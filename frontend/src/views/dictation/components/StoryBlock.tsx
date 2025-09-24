@@ -16,8 +16,22 @@ export function StoryBlock({ loading, error, storyText, revealed, onToggleReveal
         <button
           onClick={onToggleRevealed}
           disabled={loading || !!error || !storyText}
-          style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid #e5e7eb', background: '#f9fafb', cursor: 'pointer' }}
-        >{revealed ? 'Hide' : 'Show'}</button>
+          style={{ 
+            padding: '4px 8px', 
+            borderRadius: 6, 
+            border: '1px solid #e5e7eb', 
+            background: '#f9fafb', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}
+        >
+          <span style={{ fontSize: '14px' }}>
+            {revealed ? '○' : '●'}
+          </span>
+          {revealed ? 'Hide' : 'Show'}
+        </button>
       </div>
       {loading ? (
         <div style={{ color: '#6b7280' }}>Loading…</div>

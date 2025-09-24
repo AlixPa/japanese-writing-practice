@@ -32,13 +32,9 @@ clear-DANGER:
 	@echo "WARNING: This will remove ALL resources for japanese-writing-practice!"
 	@echo "Press Ctrl+C to abort or wait 5s..."
 	@sleep 5
-	# stop all containers of the project
 	-docker ps -a --filter "name=japanese-writing-practice" -q | xargs -r docker rm -f
-	# remove all images of the project
 	-docker images --filter "reference=japanese-writing-practice*" -q | xargs -r docker rmi -f
-	# remove all volumes of the project
 	-docker volume ls --filter "name=japanese-writing-practice" -q | xargs -r docker volume rm -f
-	# remove all networks of the project
 	-docker network ls --filter "name=japanese-writing-practice" -q | xargs -r docker network rm
 	rm -rf .db
 	@echo "All resources for japanese-writing-practice removed!"
