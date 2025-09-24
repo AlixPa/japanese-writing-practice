@@ -4,9 +4,6 @@ from uuid import uuid4
 from sqlalchemy import DATETIME, VARCHAR, event, text
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, mapped_column
-from src.logger import get_logger
-
-logger = get_logger()
 
 
 class Base(DeclarativeBase, MappedAsDataclass):
