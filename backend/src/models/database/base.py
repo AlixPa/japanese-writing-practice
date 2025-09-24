@@ -1,9 +1,12 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import DATETIME, VARCHAR, text
+from sqlalchemy import DATETIME, VARCHAR, event, text
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, mapped_column
+from src.logger import get_logger
+
+logger = get_logger()
 
 
 class Base(DeclarativeBase, MappedAsDataclass):
@@ -41,9 +44,9 @@ class BaseTableModel(Base, kw_only=True):
     def to_dict(
         self,
         exclude_null: bool = False,
-        exclude_col: list[str] = list(),
+        exclude_col: list[str] | None = None,
         exclude_id: bool = False,
-        include_col: list[str] = list(),
+        include_col: list[str] | None = None,
         serialize: bool = False,
     ) -> dict[str, object]:
         """
@@ -53,12 +56,12 @@ class BaseTableModel(Base, kw_only=True):
         ----------
         exclude_null : bool, optional
             If True, exclude attributes with null values. Default is False.
-        exclude_col : set[str], optional
-            Set of field names to exclude from the dictionary. Default is empty set.
+        exclude_col : list[str], optional
+            List of field names to exclude from the dictionary. Default is empty list.
         exclude_id : bool, optional
             If True, exclude the id field from the dictionary. Default is False.
-        include_col : set[str], optional
-            Set of field names to include from the dictionary. Default is empty set.
+        include_col : list[str], optional
+            List of field names to include from the dictionary. Default is empty list.
             Cannot be used if some exclude options are used.
         serialize : bool, optional
             If True, serialize values (for later usage in json.dump). Default is False.
@@ -68,6 +71,8 @@ class BaseTableModel(Base, kw_only=True):
         dict
             A dictionary representation of the model's attributes.
         """
+        include_col = include_col or list()
+        exclude_col = exclude_col or list()
         if include_col:
             if exclude_col or exclude_id or exclude_null:
                 raise ValueError("cannot select include_field with exclude options")
@@ -93,3 +98,12 @@ class BaseTableModel(Base, kw_only=True):
                 and (c.key != "id" or not exclude_id)
             )
         }
+
+
+@event.listens_for(BaseTableModel, "init", propagate=True)
+def basetablemodel_init_listener(target, _, kwargs):
+    for c in inspect(target).mapper.column_attrs:
+        if c.key in kwargs and isinstance(kwargs[c.key], str):
+            if isinstance(c.columns[0].type, DATETIME):
+                ## NOTE if not isoformat, throw exception
+                kwargs[c.key] = datetime.fromisoformat(kwargs[c.key])

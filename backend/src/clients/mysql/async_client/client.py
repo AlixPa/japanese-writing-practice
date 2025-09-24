@@ -680,7 +680,7 @@ class AMysqlClientWriter(AMysqlClient):
         AMySqlColumnInconsistencyError
             If multiple rows have individually different columns
         """
-        if isinstance(to_insert, str):
+        if isinstance(table, str):
             to_insert_dict = cast(list[dict[str, object]], to_insert)
         else:
             to_insert = cast(list[GenericTableModel], to_insert)
