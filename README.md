@@ -21,6 +21,8 @@ make app
 
 Then access it at http://localhost:5173
 
+---
+
 Stop the application using:
 
 ```shell
@@ -39,16 +41,18 @@ Follow a dictation on the “Dictation” tab with standard controls: Play, Paus
 
 ### Dictation Configuration
 
-In the “Dictation Configuration” tab, customize how each element of the dictation is played. There are three main elements:
-	•	Full Dictation: Reads the entire dictation at a selectable speed.
-	•	Wait: Inserts silence for a chosen duration.
-	•	Sentence by Sentence: Plays the dictation in smaller chunks (delimited by commas, dots, etc.) with configurable gaps between chunks.
+In the “Dictation Configuration” tab, customize how each element of the dictation is played. 
+
+There are three main elements:
+- Full Dictation: Reads the entire dictation at a selectable speed.
+- Wait: Inserts silence for a chosen duration.
+- Sentence by Sentence: Plays the dictation in smaller chunks (delimited by commas, dots, etc.) with configurable gaps between chunks.
 
 ![](static/configuration.gif)
 
 ### Custom Generation
 
-This feature is not yet implemented. It will later allow you to input a list of vocabulary to generate a story or title, then generate audio using a selectable speaker voice.
+This feature is not yet implemented. It will later allow you to input a list of vocabulary to generate a dictation, then generate audio using a selectable speaker voice.
 
 ## About the code
 
