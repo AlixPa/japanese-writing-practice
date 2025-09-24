@@ -2,4 +2,4 @@
 .db
 .env
 to_ignore/
-.venv/
+.venv

@@ -30,7 +30,7 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
     entrypoint: ["alembic", "upgrade", "head"]
   
-  reset-db:
+  init-db:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
@@ -40,7 +40,7 @@ services:
     environment:
       MYSQL_HOST: mysql
       MYSQL_PORT: ${MYSQL_PORT}
-    entrypoint: ["python", "-m", "src.reset_db"]
+    entrypoint: ["python", "-m", "src.init_db"]
     
   backend:
     build:
