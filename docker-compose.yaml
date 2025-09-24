@@ -1,0 +1,105 @@
+services:
+  mysql:
+    image: mysql:8.0
+    command: --port=${MYSQL_PORT}
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT}:${MYSQL_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    volumes:
+      - ./.db:/var/lib/mysql
+
+  migration:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: ${MYSQL_PORT}
+    entrypoint: ["alembic", "upgrade", "head"]
+  
+  reset-db:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: ${MYSQL_PORT}
+    entrypoint: ["python", "-m", "src.reset_db"]
+    
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: mysql
+      VOICEVOX_HOST: voicevox
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    volumes:
+      - ./backend/src/static/audio_files:/backend/src/static/audio_files
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/src
+          target: /backend/src
+          ignore: 
+            - __pycache__/
+            - "*.pyc"
+            - "*.pyo"
+            - .pytest_cache/
+            - .mypy_cache/
+            - scripts/
+    entrypoint:
+      [
+        "uvicorn",
+        "src.main:app",
+        "--reload",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "${BACKEND_PORT}",
+      ]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    environment:
+      BACKEND_HOST: http://backend
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /frontend
+          ignore: 
+           - node_modules/
+        - action: rebuild
+          path: ./frontend/package.json
+    entrypoint: ["bun", "run", "dev", "--host"]
+
+  voicevox:
+    image: voicevox/voicevox_engine:cpu-latest
+    container_name: voicevox
+    ports:
+      - "${VOICEVOX_PORT}:50021"

@@ -1,0 +1,6 @@
+frontend/node_modules
+backend/src/scripts/
+backend/**/__pycache__/
+backend/src/script.py
+
+to_ignore/
