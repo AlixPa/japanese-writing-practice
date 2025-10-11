@@ -8,13 +8,7 @@ from uuid import uuid4
 from sqlalchemy import CursorResult, text
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
-from src.config.env_var import (
-    MYSQL_DATABASE,
-    MYSQL_HOST,
-    MYSQL_PASSWORD,
-    MYSQL_PORT,
-    MYSQL_USER,
-)
+from src.config.env_var import mysql_config
 from src.logger import get_logger
 from src.models.database import BaseTableModel
 
@@ -39,7 +33,7 @@ def _get_engine_reader() -> AsyncEngine:
     global engine_reader
     if engine_reader is None:
         engine_reader = create_async_engine(
-            f"mysql+asyncmy://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}",
+            f"mysql+asyncmy://{mysql_config.user}:{mysql_config.password}@{mysql_config.host}:{mysql_config.port}/{mysql_config.database}",
             pool_size=5,
             max_overflow=5,
             pool_timeout=60,
@@ -53,7 +47,7 @@ def _get_engine_writer() -> AsyncEngine:
     global engine_writer
     if engine_writer is None:
         engine_writer = create_async_engine(
-            f"mysql+asyncmy://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}",
+            f"mysql+asyncmy://{mysql_config.user}:{mysql_config.password}@{mysql_config.host}:{mysql_config.port}/{mysql_config.database}",
             pool_size=5,
             max_overflow=5,
             pool_timeout=60,

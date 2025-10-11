@@ -1,4 +1,5 @@
 src/static/audio_files/custom/
+src/static/local_data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

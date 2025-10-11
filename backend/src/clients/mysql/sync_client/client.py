@@ -5,13 +5,7 @@ from logging import Logger
 from typing import Type, TypeVar, cast, overload
 
 import pymysql.cursors
-from src.config.env_var import (
-    MYSQL_DATABASE,
-    MYSQL_HOST,
-    MYSQL_PASSWORD,
-    MYSQL_PORT,
-    MYSQL_USER,
-)
+from src.config.env_var import mysql_config
 from src.logger import get_logger
 from src.models.database import BaseTableModel
 
@@ -461,11 +455,11 @@ class MysqlClientReader(MysqlClient):
     def _connect(self) -> None:
         ## TODO : Have a MYSQL_USER_WRITER and MYSQL_USER_READER
         self.connection = pymysql.connect(
-            host=MYSQL_HOST,
-            port=MYSQL_PORT,
-            user=MYSQL_USER,
-            passwd=MYSQL_PASSWORD,
-            database=MYSQL_DATABASE,
+            host=mysql_config.host,
+            port=mysql_config.port,
+            user=mysql_config.user,
+            passwd=mysql_config.password,
+            database=mysql_config.database,
             charset="utf8mb4",
             cursorclass=pymysql.cursors.DictCursor,
         )
@@ -495,11 +489,11 @@ class MysqlClientWriter(MysqlClient):
     def _connect(self) -> None:
         ## TODO : Have a MYSQL_USER_WRITER and MYSQL_USER_READER
         self.connection = pymysql.connect(
-            host=MYSQL_HOST,
-            port=MYSQL_PORT,
-            user=MYSQL_USER,
-            passwd=MYSQL_PASSWORD,
-            database=MYSQL_DATABASE,
+            host=mysql_config.host,
+            port=mysql_config.port,
+            user=mysql_config.user,
+            passwd=mysql_config.password,
+            database=mysql_config.database,
             charset="utf8mb4",
             cursorclass=pymysql.cursors.DictCursor,
         )

@@ -4,14 +4,14 @@ import sys
 
 from asgi_correlation_id import correlation_id
 from src.config.env_var import ENV
-from src.config.formats import DATETIME_FORMAT
-from src.config.runtime import SERVICE_ENV
+from src.config.formats import datetime_format
+from src.config.runtime import service_env
 
 
 class JsonFormatter(logging.Formatter):
     def format(self, record):
         log_record = {
-            "timestamp": self.formatTime(record, DATETIME_FORMAT.SQL_DATETIME),
+            "timestamp": self.formatTime(record, datetime_format.sql_datetime),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
@@ -31,7 +31,7 @@ class LocalFormatter(logging.Formatter):
         }
         RESET_COLOR = "\033[0m"
 
-        timestamp = self.formatTime(record, DATETIME_FORMAT.SQL_DATETIME)
+        timestamp = self.formatTime(record, datetime_format.sql_datetime)
         level = record.levelname
         color = LOG_COlORS.get(level, "")
         logger = record.name
@@ -45,14 +45,14 @@ class LocalFormatter(logging.Formatter):
 
 def get_logger(name: str = "AGE_backend_logger", env: str = ENV):
     logger = logging.getLogger(name)
-    if env == SERVICE_ENV.PRODUCTION:
+    if env == service_env.production:
         logger.setLevel(logging.INFO)
     else:
         logger.setLevel(logging.DEBUG)
 
     if not logger.hasHandlers():
         handler = logging.StreamHandler(sys.stdout)
-        if env == SERVICE_ENV.PRODUCTION:
+        if env == service_env.production:
             handler.setFormatter(JsonFormatter())
         else:
             handler.setFormatter(LocalFormatter())

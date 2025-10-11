@@ -1,12 +1,23 @@
 import os
+from dataclasses import dataclass
 
 ENV = os.getenv("ENV", "local")
 
-MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "")
-MYSQL_USER = os.getenv("MYSQL_USER", "")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
-MYSQL_PORT = int(os.getenv("MYSQL_PORT", 3306))
-MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
 
-VOICEVOX_HOST = os.getenv("VOICEVOX_HOST", "localhost")
-VOICEVOX_PORT = int(os.getenv("VOICEVOX_PORT", 8888))
+@dataclass
+class MysqlConfig:
+    database: str = os.getenv("MYSQL_DATABASE", "")
+    user: str = os.getenv("MYSQL_USER", "")
+    password: str = os.getenv("MYSQL_PASSWORD", "")
+    port: int = int(os.getenv("MYSQL_PORT", 3306))
+    host: str = os.getenv("MYSQL_HOST", "localhost")
+
+
+@dataclass
+class VoiceVoxConfig:
+    host: str = os.getenv("VOICEVOX_HOST", "localhost")
+    port: int = int(os.getenv("VOICEVOX_PORT", 8888))
+
+
+mysql_config = MysqlConfig()
+voicevox_config = VoiceVoxConfig()

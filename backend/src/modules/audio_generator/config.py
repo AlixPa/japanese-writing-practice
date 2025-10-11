@@ -1,25 +1,14 @@
+from dataclasses import dataclass
 from pathlib import Path
 
 
+@dataclass
 class GPTConfig:
-    def __init__(
-        self,
-        generation_prompt: str | None = None,
-        generation_developer_prompt: str | None = None,
-        generation_model: str | None = None,
-        correction_prompt: str | None = None,
-        correction_model: str | None = None,
-        name_model: str | None = None,
-        name_prompt: str | None = None,
-    ) -> None:
-        self.GENERATION_MODEL = generation_model or "gpt-4.1"
-        self.GENERATION_DEVELOPER_PROMPT = (
-            generation_developer_prompt
-            or "You are a smart Japanese professor. You only answer with perfectly natural Japanese. Your Japanese is very natural and never strange or odd just to full fill students needs."
-        )
-        self.GENERATION_PROMPT = (
-            generation_prompt
-            or """You are a Japanese teacher creating dictation stories for language students.
+    generation_model: str = "gpt-4.1"
+    generation_developer_prompt: str = (
+        "You are a smart Japanese professor. You only answer with perfectly natural Japanese. Your Japanese is very natural and never strange or odd just to full fill students needs."
+    )
+    generation_prompt: str = """You are a Japanese teacher creating dictation stories for language students.
 
 I will give you a list of vocabulary. Your task is to write a short story (5 sentences) that uses vocabulary from the list.
 
@@ -30,11 +19,8 @@ Rules:
 
 The list of vocabulary is: {}
 """
-        )
-        self.CORRECTION_MODEL = correction_model or "gpt-5"
-        self.CORRECTION_PROMPT = (
-            correction_prompt
-            or """You are a Japanese language professional correcting dictations.
+    correction_model: str = "gpt-5"
+    correction_prompt: str = """You are a Japanese language professional correcting dictations.
 
 I will give you a short story written with restricted vocabulary. Sometimes sentences may be strange, ungrammatical, or unnatural.
 
@@ -49,18 +35,15 @@ Steps:
 Use your deep knowledge in Japanese to correct any unnatural sentence.
 
 The text is: {}"""
-        )
-        self.NAME_MODEL = name_model or "gpt-4.1-mini"
-        self.NAME_PROMPT = (
-            name_prompt
-            or """You will be given a small story in Japanese and you must output a title for the story.
+    name_model: str = "gpt-4.1-mini"
+
+    name_prompt: str = """You will be given a small story in Japanese and you must output a title for the story.
 
 Try to be as concise as possible and keep it simple.
 
 Only output the title and nothing else.
         
 The story is: {}"""
-        )
 
 
-GPT_CONFIG = GPTConfig()
+gpt_config = GPTConfig()

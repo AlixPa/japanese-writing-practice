@@ -9,13 +9,7 @@ root_path = Path(__file__).resolve().parents[1]
 sys.path.append(str(root_path))
 
 import src.models.database
-from src.config.env_var import (
-    MYSQL_DATABASE,
-    MYSQL_HOST,
-    MYSQL_PASSWORD,
-    MYSQL_PORT,
-    MYSQL_USER,
-)
+from src.config.env_var import mysql_config
 from src.models.database import Base
 
 # this is the Alembic Config object, which provides
@@ -38,11 +32,10 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 DATABASE_URL = (
-    f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}"
-    f"@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}"
+    f"mysql+pymysql://{mysql_config.user}:{mysql_config.password}"
+    f"@{mysql_config.host}:{mysql_config.port}/{mysql_config.database}"
 )
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
-print(DATABASE_URL)
 
 
 def run_migrations_offline() -> None:

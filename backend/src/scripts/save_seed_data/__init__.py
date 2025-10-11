@@ -1,5 +1,5 @@
-from .main import main
+from .main import main as save_seed_data_main
 
 __all__ = [
-    "main",
+    "save_seed_data_main",
 ]

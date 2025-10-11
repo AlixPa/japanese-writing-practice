@@ -2,9 +2,9 @@ from logging import Logger
 
 import requests
 from openai import OpenAI
-from src.config.env_var import VOICEVOX_HOST, VOICEVOX_PORT
+from src.clients.voicevox import VoiceVoxClient
 
-from .config import GPT_CONFIG
+from .config import gpt_config
 from .models import Element, StoryGeneration
 
 
@@ -12,42 +12,42 @@ class Generator:
     def __init__(self, logger: Logger) -> None:
         self.openai = OpenAI()
         self.logger = logger
-        self.voicevox_url = f"http://{VOICEVOX_HOST}:{VOICEVOX_PORT}"
+        self.voicevox_client = VoiceVoxClient(self.logger)
 
     def generate_story(self, list_voc: list[Element]) -> StoryGeneration:
         """Generate a story from a list of vocabulary."""
         ls_voc = [e.element for e in list_voc]
 
         generation = self.openai.responses.create(
-            model=GPT_CONFIG.GENERATION_MODEL,
+            model=gpt_config.generation_model,
             input=[
                 {
                     "role": "developer",
-                    "content": GPT_CONFIG.GENERATION_DEVELOPER_PROMPT,
+                    "content": gpt_config.generation_developer_prompt,
                 },
                 {
                     "role": "user",
-                    "content": GPT_CONFIG.GENERATION_PROMPT.format(ls_voc),
+                    "content": gpt_config.generation_prompt.format(ls_voc),
                 },
             ],
         ).output_text
 
         correction = self.openai.responses.create(
-            model=GPT_CONFIG.CORRECTION_MODEL,
+            model=gpt_config.correction_model,
             input=[
                 {
                     "role": "user",
-                    "content": GPT_CONFIG.CORRECTION_PROMPT.format(generation),
+                    "content": gpt_config.correction_prompt.format(generation),
                 },
             ],
         ).output_text
 
         title = self.openai.responses.create(
-            model=GPT_CONFIG.NAME_MODEL,
+            model=gpt_config.name_model,
             input=[
                 {
                     "role": "user",
-                    "content": GPT_CONFIG.NAME_PROMPT.format(correction),
+                    "content": gpt_config.name_prompt.format(correction),
                 },
             ],
         ).output_text
@@ -56,20 +56,9 @@ class Generator:
             input_vocabulary_list=list_voc, text=correction, title=title
         )
 
-    def text_to_speech(self, japanese_text: str, speed: float) -> bytes:
-        query_payload = requests.post(
-            f"{self.voicevox_url}/audio_query",
-            params={"speaker": 9, "text": japanese_text},
+    def text_to_speech(
+        self, japanese_text: str, speed: float, speaker_id: int = 9
+    ) -> bytes:
+        return self.voicevox_client.text_to_speech(
+            japanese_text=japanese_text, speed=speed, speaker_id=speaker_id
         )
-        query_payload.raise_for_status()
-        audio_query = query_payload.json()
-        audio_query["speedScale"] = speed
-
-        synthesis = requests.post(
-            f"{self.voicevox_url}/synthesis",
-            params={"speaker": 9},
-            headers={"Content-Type": "application/json"},
-            json=audio_query,
-        )
-        synthesis.raise_for_status()
-        return synthesis.content

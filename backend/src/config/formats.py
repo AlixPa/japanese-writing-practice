@@ -1,8 +1,11 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class DateTimeFormat:
-    def __init__(self) -> None:
-        self.ISO_8601_DATE = "%Y-%m-%d"
-        self.ISO_8601_UTC = "%Y-%m-%dT%H:%M:%SZ"
-        self.SQL_DATETIME = "%Y-%m-%d %H:%M:%S"
+    iso_8601_date: str = "%Y-%m-%d"
+    iso_8601_utc: str = "%Y-%m-%dT%H:%M:%SZ"
+    sql_datetime: str = "%Y-%m-%d %H:%M:%S"
 
 
-DATETIME_FORMAT = DateTimeFormat()
+datetime_format = DateTimeFormat()

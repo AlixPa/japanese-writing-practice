@@ -2,7 +2,7 @@ import json
 from typing import Type
 
 from src.clients.mysql import MysqlClientWriter
-from src.config.runtime import STATIC_PATH
+from src.config.runtime import path_config
 from src.logger import get_logger
 from src.models.database import (
     AudioTable,
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     logger.info(f"Loading: {tables=}")
 
     for table in tables:
-        with open(STATIC_PATH.SEED_DB / f"{table.__tablename__}.json", "r") as f:
+        with open(path_config.seed_db / f"{table.__tablename__}.json", "r") as f:
             rows_raw = json.load(f)
             rows = [table(**r) for r in rows_raw]
             mysql_writer.start_transaction()

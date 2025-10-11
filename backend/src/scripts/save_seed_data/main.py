@@ -1,7 +1,7 @@
 import json
 from typing import Type
 
-from src.config.runtime import STATIC_PATH
+from src.config.runtime import path_config
 from src.logger import get_logger
 from src.models.database import (
     AudioTable,
@@ -31,5 +31,5 @@ def main() -> None:
     ]
     for table in tables:
         rows = get_all_rows(table)
-        with open(STATIC_PATH.SEED_DB / f"{table.__tablename__}.json", "w") as f:
+        with open(path_config.seed_db / f"{table.__tablename__}.json", "w") as f:
             json.dump([r.to_dict(serialize=True) for r in rows], f)

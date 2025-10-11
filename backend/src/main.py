@@ -4,7 +4,7 @@ from fastapi import FastAPI
 # from fastapi.middleware.cors import CORSMiddleware
 from src.api import api_router
 from src.config.env_var import ENV
-from src.config.runtime import SERVICE_ENV
+from src.config.runtime import service_env
 
 app = FastAPI()
 
@@ -23,5 +23,5 @@ app.add_middleware(
     CorrelationIdMiddleware,
     header_name="X-Correlation-ID",
     update_request_header=True,
-    validator=None if ENV == SERVICE_ENV.LOCAL else is_valid_uuid4,
+    validator=None if ENV == service_env.local else is_valid_uuid4,
 )

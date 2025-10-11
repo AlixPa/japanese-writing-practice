@@ -1,5 +1,5 @@
-from .main import main
+from .main import main as wanikani_generation_main
 
 __all__ = [
-    "main",
+    "wanikani_generation_main",
 ]

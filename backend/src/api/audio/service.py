@@ -1,6 +1,6 @@
 import aiofiles
 from src.clients.mysql import AMysqlClientReader, AMySqlIdNotFoundError
-from src.config.runtime import STATIC_PATH
+from src.config.runtime import path_config
 from src.exceptions.http import WrongArgumentException
 from src.logger import get_logger
 from src.models.database import (
@@ -81,7 +81,7 @@ async def load_audio_bytes(audio_id: str) -> bytes:
     audio_relative_path = audio.url
 
     ## TODO: For now all is local, adapt here if files are stored on S3 or else
-    async with aiofiles.open(STATIC_PATH.AUDIO / audio_relative_path, "rb") as f:
+    async with aiofiles.open(path_config.audio / audio_relative_path, "rb") as f:
         audio_bytes = await f.read()
 
     return audio_bytes

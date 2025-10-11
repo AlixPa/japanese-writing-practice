@@ -4,7 +4,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from src.clients.mysql.sync_client import MysqlClientWriter
-from src.config.runtime import STATIC_PATH
+from src.config.runtime import path_config
 from src.logger import get_logger
 from src.models.database import (
     AudioTable,
@@ -39,7 +39,7 @@ def gen_and_store_text_audio(
     )
     audio_file_dest = str(uuid4()) + ".wav"
     ## NOTE: Here we use default just because I want them in the base application
-    with open(STATIC_PATH.AUDIO / "default" / audio_file_dest, "wb") as f:
+    with open(path_config.audio / "default" / audio_file_dest, "wb") as f:
         f.write(audio_bytes)
 
     return audio_file_dest
