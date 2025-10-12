@@ -32,4 +32,10 @@ def main() -> None:
     for table in tables:
         rows = get_all_rows(table)
         with open(path_config.seed_db / f"{table.__tablename__}.json", "w") as f:
-            json.dump([r.to_dict(serialize=True) for r in rows], f)
+            json.dump(
+                [
+                    r.to_dict(serialize=True, exclude_col=["createdAt", "updatedAt"])
+                    for r in rows
+                ],
+                f,
+            )

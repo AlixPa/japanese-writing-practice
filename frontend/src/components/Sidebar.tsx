@@ -1,6 +1,6 @@
 import React from 'react'
 
-type TabKey = 'sample1' | 'sample2' | 'sample3'
+type TabKey = 'home' | 'sample1' | 'sample2' | 'sample3'
 
 interface SidebarProps {
   activeTab: TabKey
@@ -8,6 +8,7 @@ interface SidebarProps {
 }
 
 const menuItems: { key: TabKey; label: string }[] = [
+  { key: 'home', label: 'Home' },
   { key: 'sample1', label: 'Dictation' },
   { key: 'sample2', label: 'Configuration' },
   { key: 'sample3', label: 'Generation' },
