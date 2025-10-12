@@ -5,7 +5,7 @@ By default, some dictations are provided based on WaniKani vocabulary per level.
 
 ## Getting Started
 
-Before running the application, ensure Docker Desktop is installed:
+Before running the application, ensure Docker Desktop is installed (and latest version!):
 
 1. Download Docker Desktop from [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
 2. Follow the installation instructions for your operating system
@@ -29,7 +29,7 @@ Stop the application using:
 make stop
 ```
 
-Stopping the application does not delete your configurations, audio files, or other data.
+Note: stopping the application does not delete your configurations, audio files, or other data.
 
 ## Features
 
@@ -37,7 +37,7 @@ Stopping the application does not delete your configurations, audio files, or ot
 
 Follow a dictation on the “Dictation” tab with standard controls: Play, Pause, Resume, etc.
 
-![](static/dictation.gif)
+![](static/dict.gif)
 
 ### Dictation Configuration
 
@@ -46,9 +46,9 @@ In the “Dictation Configuration” tab, customize how each element of the dict
 There are three main elements:
 - Full Dictation: Reads the entire dictation at a selectable speed.
 - Wait: Inserts silence for a chosen duration.
-- Sentence by Sentence: Plays the dictation in smaller chunks (delimited by commas, dots, etc.) with configurable gaps between chunks.
+- Sentence by Sentence: Plays the dictation in smaller chunks (delimited by commas, dots, etc.) with configurable gaps between chunks and chunk repeat.
 
-![](static/configuration.gif)
+![](static/conf.gif)
 
 ### Custom Generation
 
@@ -56,6 +56,6 @@ This feature is not yet implemented. It will later allow you to input a list of 
 
 ## About the code
 
-The whole infra / DB / Server (backend) has been coded by my little hands, so feel free to open any issues if you find anything. (There is certainly bugs here and there, but they are hand-made <3)
+The whole infra / DB / Server (backend) has been coded by my little hands, so feel free to open any issues if you find anything. (There are certainly bugs here and there, but they are hand-made <3)
 
-The whole frontend has been massively gpt-generated (except for some configs/proxies), so feel free to not read it. I promise I will someday learn React but you cannot change my mind on the fact that React enjoyers are psychopaths.
+The whole frontend has been massively gpt-generated (except for some configs/proxies/file structure), so feel free to not read it. I promise I will someday learn React but you cannot change my mind on the fact that React enjoyers are psychopaths.
