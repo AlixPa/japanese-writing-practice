@@ -91,7 +91,7 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
               value={block.waitSeconds ?? ''}
               onChange={(e) => {
                 const val = e.target.value
-                const num = val === '' ? undefined : Math.max(0, Number(val))
+                const num = val === '' ? undefined : Math.max(1, Number(val))
                 onChange({ waitSeconds: num })
               }}
               style={{
@@ -115,7 +115,7 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
                 value={block.sentenceGapSeconds ?? ''}
                 onChange={(e) => {
                   const val = e.target.value
-                  const num = val === '' ? undefined : Math.max(0, Number(val))
+                  const num = val === '' ? undefined : Math.max(1, Number(val))
                   onChange({ sentenceGapSeconds: num })
                 }}
                 style={{
@@ -130,6 +130,26 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
               value={block.sentenceSpeed ?? 1}
               onChange={(value) => onChange({ sentenceSpeed: value })}
             />
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
+              <span style={{ color: '#6b7280' }}>Repeat</span>
+              <input
+                type="number"
+                min={1}
+                max={10}
+                value={block.repeat ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value
+                  const num = val === '' ? undefined : Math.max(1, Number(val))
+                  onChange({ repeat: num })
+                }}
+                style={{
+                  width: 60,
+                  padding: '4px 6px',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: 6
+                }}
+              />
+            </label>
           </>
         )}
       </div>

@@ -19,6 +19,7 @@ function toBlocks(api: ApiConfig['sequence']): DictationBlock[] {
         type: 'sentence',
         sentenceGapSeconds: (item as any).wait,
         sentenceSpeed: ((item as any).speed ?? 100) / 100,
+        repeat: (item as any).repeat ?? 1,
       }
     }
     // only speed → full dictation
@@ -36,6 +37,7 @@ function toApiSequence(blocks: DictationBlock[]): ApiConfig['sequence'] {
     if (b.type === 'sentence') return {
       wait: Math.max(0, Math.round((b.sentenceGapSeconds ?? 0) * 100) / 100),
       speed: Math.round(((b.sentenceSpeed ?? 1) * 100)),
+      repeat: b.repeat ?? 1,
     }
     return {
       speed: Math.round(((b.fullSpeed ?? 1) * 100)),

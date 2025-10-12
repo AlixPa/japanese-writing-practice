@@ -3,7 +3,7 @@ import { PlayerSequence } from './PlayerSequence'
 
 interface PlayerProps {
   storyId: string
-  configSequence: Array<{ wait?: number; speed?: number }>
+  configSequence: Array<{ wait?: number; speed?: number; repeat?: number }>
   onPlayError: (error: string | null) => void
   playError: string | null
   onGetAudioMetadata: (storyId: string, speed: number) => Promise<{ audio_id: string }>
@@ -463,31 +463,45 @@ export function Player({
           
           for (let chunkIndex = startChunkIndex; chunkIndex < list.length; chunkIndex++) {
             const item = list[chunkIndex]
-            if (playAbortRef.current?.aborted) break
+            const repeats = step.repeat ?? 1
             
-            // Set current sub-element to audio chunk
-            setCurrentSubElement({ type: 'audio', index: chunkIndex })
-            
-            const blob = await fetchAudioBlob(item.audio_id)
-            if (playAbortRef.current?.aborted) break
-            await playAudioBlob(blob)
-            if (playAbortRef.current?.aborted) break
-            
-            // Only add gap if not the last chunk
-            if (chunkIndex < list.length - 1 && gapMs > 0) {
-            // Set current sub-element to gap
-            setCurrentSubElement({ type: 'gap', index: chunkIndex, progress: { current: 0, total: gapMs } })
-            
-            // Clear any previous audio since we're now in a gap
-            if (playAbortRef.current) {
-              playAbortRef.current.currentAudio = undefined
-            }
-            
-            await waitWithPause(gapMs, (current, total) => {
-              if (!playAbortRef.current?.aborted) {
-                setCurrentSubElement(prev => prev ? { ...prev, progress: { current, total } } : null)
+            // Repeat this chunk the specified number of times
+            for (let rep = 0; rep < repeats; rep++) {
+              if (playAbortRef.current?.aborted) break
+              
+              // Set current sub-element to audio chunk
+              setCurrentSubElement({ type: 'audio', index: chunkIndex })
+              
+              const blob = await fetchAudioBlob(item.audio_id)
+              if (playAbortRef.current?.aborted) break
+              await playAudioBlob(blob)
+              if (playAbortRef.current?.aborted) break
+              
+              // Add gap after each repeat (except the last repeat of the last chunk)
+              const isLastRepeat = rep === repeats - 1
+              const isLastChunk = chunkIndex === list.length - 1
+              const shouldAddGap = (!isLastRepeat || !isLastChunk) && gapMs > 0
+              
+              if (shouldAddGap) {
+                // Set current sub-element to gap
+                setCurrentSubElement({ type: 'gap', index: chunkIndex, progress: { current: 0, total: gapMs } })
+                
+                // Clear any previous audio since we're now in a gap
+                if (playAbortRef.current) {
+                  playAbortRef.current.currentAudio = undefined
+                }
+                
+                await waitWithPause(gapMs, (current, total) => {
+                  if (!playAbortRef.current?.aborted) {
+                    setCurrentSubElement(prev => prev ? { ...prev, progress: { current, total } } : null)
+                  }
+                })
+                
+                // Check if aborted after gap completion BEFORE clearing sub-element
+                if (playAbortRef.current?.aborted) break
+                
+                setCurrentSubElement(null)
               }
-            })
             }
           }
           

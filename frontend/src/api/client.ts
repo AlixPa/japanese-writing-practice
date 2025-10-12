@@ -1,7 +1,7 @@
 export interface ApiConfig {
   id: string
   name: string
-  sequence: Array<{ wait?: number; speed?: number }>
+  sequence: Array<{ wait?: number; speed?: number; repeat?: number }>
 }
 
 export type GetConfigsResponse = ApiConfig[]

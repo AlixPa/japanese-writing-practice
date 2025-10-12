@@ -22,7 +22,7 @@ def str_to_sequence(
     for e in sequence_raw:
         if "wait" not in e:
             ls_el.append(FullDictationElement(**e))
-        elif not "speed" in e:
+        elif "speed" not in e:
             ls_el.append(WaitElement(**e))
         else:
             ls_el.append(SentencesElement(**e))

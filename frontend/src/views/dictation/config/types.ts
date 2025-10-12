@@ -10,6 +10,7 @@ export interface DictationBlock {
   // Only used when type === 'sentence'
   sentenceGapSeconds?: number
   sentenceSpeed?: number // 0.7 for 70%, 1 for 100%
+  repeat?: number // Number of times to repeat each sentence (default: 1)
 }
 
 

@@ -2,7 +2,7 @@ import React from 'react'
 import { ProgressBar } from './ProgressBar'
 
 interface Props {
-  sequence: Array<{ wait?: number; speed?: number }>
+  sequence: Array<{ wait?: number; speed?: number; repeat?: number }>
   activeIndex: number | null
   onElementSelect?: (index: number) => void
   isPlaying?: boolean
@@ -27,7 +27,11 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
         let subtitle = ''
         if (hasWait && !hasSpeed) { title = 'Wait'; subtitle = `${step.wait}s` }
         else if (!hasWait && hasSpeed) { title = 'Full dictation'; subtitle = `${step.speed}%` }
-        else if (hasWait && hasSpeed) { title = 'Sentence-by-sentence'; subtitle = `${step.speed}% • gap ${step.wait}s` }
+        else if (hasWait && hasSpeed) { 
+          title = 'Sentence-by-sentence'
+          const repeats = step.repeat ?? 1
+          subtitle = `${step.speed}% • gap ${step.wait}s${repeats > 1 ? ` • Repeat ${repeats}x` : ''}`
+        }
         else { title = 'Unknown'; subtitle = '' }
         
         const isActive = activeIndex === idx

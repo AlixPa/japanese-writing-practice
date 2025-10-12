@@ -132,7 +132,7 @@ export function ConfigEditor({ blocks, onBlocksChange }: Props) {
               const newBlock: DictationBlock = { id: generateId(), type: data.blockType }
               if (data.blockType === 'wait') newBlock.waitSeconds = 1
               if (data.blockType === 'full') newBlock.fullSpeed = 1
-              if (data.blockType === 'sentence') { newBlock.sentenceGapSeconds = 1; newBlock.sentenceSpeed = 1 }
+              if (data.blockType === 'sentence') { newBlock.sentenceGapSeconds = 1; newBlock.sentenceSpeed = 1; newBlock.repeat = 1 }
               onBlocksChange(insertAt(blocks, targetIndex, newBlock))
             } else if (data.kind === 'block') {
               onBlocksChange(moveById(blocks, data.id, targetIndex))

@@ -8,6 +8,7 @@ class WaitElement(BaseModel):
 class SentencesElement(BaseModel):
     wait: int
     speed: int
+    repeat: int
 
 
 class FullDictationElement(BaseModel):
