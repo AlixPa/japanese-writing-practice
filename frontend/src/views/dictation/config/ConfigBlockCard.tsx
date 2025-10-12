@@ -1,5 +1,6 @@
 import React from 'react'
 import type { DictationBlock } from './types'
+import { SpeedSelector } from '@/components/SpeedSelector'
 
 interface Props {
   block: DictationBlock
@@ -75,21 +76,10 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
         </div>
         <strong>{getLabel(block.type)}</strong>
         {block.type === 'full' && (
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
-            <span style={{ color: '#6b7280' }}>Speed</span>
-            <select
-              value={block.fullSpeed ?? 1}
-              onChange={(e) => onChange({ fullSpeed: Number(e.target.value) })}
-              style={{
-                padding: '4px 6px',
-                border: '1px solid #e5e7eb',
-                borderRadius: 6
-              }}
-            >
-              <option value={0.7}>70%</option>
-              <option value={1}>100%</option>
-            </select>
-          </label>
+          <SpeedSelector
+            value={block.fullSpeed ?? 1}
+            onChange={(value) => onChange({ fullSpeed: value })}
+          />
         )}
         {block.type === 'wait' && (
           <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
@@ -136,21 +126,10 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
                 }}
               />
             </label>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
-              <span style={{ color: '#6b7280' }}>Speed</span>
-              <select
-                value={block.sentenceSpeed ?? 1}
-                onChange={(e) => onChange({ sentenceSpeed: Number(e.target.value) })}
-                style={{
-                  padding: '4px 6px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 6
-                }}
-              >
-                <option value={0.7}>70%</option>
-                <option value={1}>100%</option>
-              </select>
-            </label>
+            <SpeedSelector
+              value={block.sentenceSpeed ?? 1}
+              onChange={(value) => onChange({ sentenceSpeed: value })}
+            />
           </>
         )}
       </div>

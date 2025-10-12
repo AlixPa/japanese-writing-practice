@@ -9,6 +9,14 @@ from .story import Story
 
 class StoryAudio(BaseTableModel):
     __tablename__ = "story_audio"
+    __table_args__ = tuple(
+        UniqueConstraint(
+            "storyId",
+            "speedPercentage",
+            "speakerId",
+            name="uq_story_audio_story_speed_speaker",
+        )
+    )
 
     storyId: Mapped[str] = mapped_column(
         VARCHAR(255),
@@ -25,4 +33,7 @@ class StoryAudio(BaseTableModel):
         TINYINT(unsigned=True),
         nullable=False,
     )
-    UniqueConstraint("storyId", "speedPercentage")
+    speakerId: Mapped[int] = mapped_column(
+        TINYINT(unsigned=True),
+        nullable=False,
+    )

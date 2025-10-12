@@ -1,1 +1,1 @@
-[{"name": "Default Config", "sequence": "[{\"speed\": 100}, {\"wait\": 5}, {\"wait\": 3, \"speed\": 70}]", "id": "d385a3ce-b5ff-4967-bde3-f2aa5b0751eb", "createdAt": "2025-09-24T21:51:33", "updatedAt": "2025-09-24T21:51:33"}]
+[{"name": "Default Configuration", "sequence": "[{\"speed\": 100}, {\"wait\": 5}, {\"wait\": 3, \"speed\": 65}, {\"wait\": 5}, {\"speed\": 90}, {\"wait\": 5}, {\"speed\": 100}]", "id": "83b6b80f-e65a-40ae-ba1b-5c6fb8c455da", "createdAt": "2025-10-12T02:03:27", "updatedAt": "2025-10-12T02:03:27"}]

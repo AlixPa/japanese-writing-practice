@@ -13,9 +13,13 @@ stop:
 
 init-app:
 	@if [ ! -f .env ]; then cp .env_example .env; fi
+# 	reset db
+	@if [ -d .db ]; then rm -rf .db; fi
+	mkdir .db
+	chmod -R 777 .db
 	$(MAKE) run-init-db
 
-app: init-app run-frontend run-backend
+app: stop init-app run-frontend run-backend
 # app-advanced: app run-voicevox
 
 frontend-dev:
@@ -40,5 +44,5 @@ clear-DANGER:
 	@echo "All resources for japanese-writing-practice removed!"
 
 .PHONY: $(foreach s,$(SERVICES),run-$(s) rebuild-$(s) logs-$(s)) \
-	stop clean app frontend-dev backend-dev \
+	stop clean app frontend-dev backend-dev clear-DANGER \
 # 	app-advanced

@@ -32,10 +32,12 @@ def gen_and_store_text_audio(
     text: str,
     generator: AudioGenerator,
     speed_percentage: int,
+    speaker_id: int,
 ) -> str:
     audio_bytes = generator.text_to_speech(
         japanese_text=text,
         speed=float(speed_percentage) / 100,
+        speaker_id=speaker_id,
     )
     audio_file_dest = str(uuid4()) + ".wav"
     ## NOTE: Here we use default just because I want them in the base application
@@ -72,6 +74,7 @@ def insert_audio_metadata(
     story: StoryTable,
     audio_file_dest: str,
     speed_percentage: int,
+    speaker_id: int,
 ) -> StoryTable:
     mysql_writer = MysqlClientWriter(logger)
     mysql_writer.start_transaction()
@@ -82,7 +85,10 @@ def insert_audio_metadata(
         logger.info(f"Inserted {audio=}")
 
         story_audio = StoryAudioTable(
-            storyId=story.id, audioId=audio.id, speedPercentage=speed_percentage
+            storyId=story.id,
+            audioId=audio.id,
+            speedPercentage=speed_percentage,
+            speakerId=speaker_id,
         )
         mysql_writer.insert_one(table=StoryAudioTable, to_insert=story_audio)
         logger.info(f"Inserted {story_audio=}")
@@ -106,6 +112,7 @@ def gen_and_store_chunks(
     story_chunks: list[StoryChunkTable],
     generator: AudioGenerator,
     speed_percentage: int,
+    speaker_id: int,
 ) -> list[AudioChunk]:
     ls_audio_chunks: list[AudioChunk] = list()
     for story_chunk in story_chunks:
@@ -113,6 +120,7 @@ def gen_and_store_chunks(
             text=story_chunk.text,
             generator=generator,
             speed_percentage=speed_percentage,
+            speaker_id=speaker_id,
         )
         ls_audio_chunks.append(AudioChunk(text=story_chunk.text, audio_path=audio_path))
     return ls_audio_chunks
@@ -145,6 +153,7 @@ def insert_audio_chunk_metadata(
     story_chunk: StoryChunkTable,
     audio_chunk: AudioChunk,
     speed_percentage: int,
+    speaker_id: int,
 ) -> None:
     mysql_writer = MysqlClientWriter(logger)
     mysql_writer.start_transaction()
@@ -157,6 +166,7 @@ def insert_audio_chunk_metadata(
             storyChunkId=story_chunk.id,
             audioId=audio.id,
             speedPercentage=speed_percentage,
+            speakerId=speaker_id,
         )
         mysql_writer.insert_one(table=StoryChunkAudioTable, to_insert=story_chunk_audio)
         logger.info(f"Inserted {story_chunk_audio=}")

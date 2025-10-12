@@ -97,6 +97,7 @@ class BaseTableModel(Base, kw_only=True):
         }
 
 
+# Allow to correctly load datetime from str (ex, json seed data)
 @event.listens_for(BaseTableModel, "init", propagate=True)
 def basetablemodel_init_listener(target, _, kwargs):
     for c in inspect(target).mapper.column_attrs:

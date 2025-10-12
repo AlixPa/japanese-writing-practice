@@ -9,6 +9,14 @@ from .story_chunk import StoryChunk
 
 class StoryChunkAudio(BaseTableModel):
     __tablename__ = "story_chunk_audio"
+    __table_args__ = tuple(
+        UniqueConstraint(
+            "storyChunkId",
+            "speedPercentage",
+            "speakerId",
+            name="uq_story_audio_chunk_story_chunk_speed_speaker",
+        )
+    )
 
     storyChunkId: Mapped[str] = mapped_column(
         VARCHAR(255),
@@ -25,4 +33,7 @@ class StoryChunkAudio(BaseTableModel):
         TINYINT(unsigned=True),
         nullable=False,
     )
-    UniqueConstraint("storyChunkId", "speedPercentage")
+    speakerId: Mapped[int] = mapped_column(
+        TINYINT(unsigned=True),
+        nullable=False,
+    )
