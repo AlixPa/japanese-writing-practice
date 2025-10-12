@@ -39,7 +39,6 @@ clear-DANGER:
 	-docker ps -a --filter "name=japanese-writing-practice" -q | xargs -r docker rm -f
 	-docker images --filter "reference=japanese-writing-practice*" -q | xargs -r docker rmi -f
 	-docker volume ls --filter "name=japanese-writing-practice" -q | xargs -r docker volume rm -f
-	-docker network ls --filter "name=japanese-writing-practice" -q | xargs -r docker network rm
 	rm -rf .db
 	@echo "All resources for japanese-writing-practice removed!"
 

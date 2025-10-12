@@ -41,7 +41,7 @@ def gen_with_gpt(
         for story_idx in range(1, stories_per_level + 1):
             random.shuffle(vocs)
             local_vocs = vocs[:20]
-            logger.info(f"Generating {story_idx} for {level=} with {local_vocs=}")
+            logger.info(f"Generating {story_idx=} for {level=} with {local_vocs=}")
 
             generated_story = generator.generate_story(local_vocs)
             logger.info(f"Generated story of {level=}, {generated_story=}")

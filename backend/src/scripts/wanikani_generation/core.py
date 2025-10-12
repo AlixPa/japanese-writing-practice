@@ -80,7 +80,7 @@ def insert_audio_metadata(
     mysql_writer.start_transaction()
     try:
 
-        audio = AudioTable(url=audio_file_dest)
+        audio = AudioTable(url="default/" + audio_file_dest)
         mysql_writer.insert_one(table=AudioTable, to_insert=audio)
         logger.info(f"Inserted {audio=}")
 
@@ -158,7 +158,7 @@ def insert_audio_chunk_metadata(
     mysql_writer = MysqlClientWriter(logger)
     mysql_writer.start_transaction()
     try:
-        audio = AudioTable(url=audio_chunk.audio_path)
+        audio = AudioTable(url="default/" + audio_chunk.audio_path)
         mysql_writer.insert_one(table=AudioTable, to_insert=audio)
         logger.info(f"Inserted {audio=}")
 
