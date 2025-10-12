@@ -12,9 +12,11 @@ interface Props {
   sentenceChunks?: Array<{ audio_id: string }>
   onSubElementSelect?: (type: 'audio' | 'gap', index: number) => void
   selectedSubElementDuration?: number | null
+  onPlayPause?: () => void
+  currentCycle?: { chunkIndex: number; cycle: number; totalCycles: number } | null
 }
 
-export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlaying, isPaused, progress, currentSubElement, sentenceChunks, onSubElementSelect, selectedSubElementDuration }: Props) {
+export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlaying, isPaused, progress, currentSubElement, sentenceChunks, onSubElementSelect, selectedSubElementDuration, onPlayPause, currentCycle }: Props) {
   if (!sequence || sequence.length === 0) {
     return <div style={{ color: '#6b7280' }}>No configuration selected.</div>
   }
@@ -30,7 +32,7 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
         else if (hasWait && hasSpeed) { 
           title = 'Sentence-by-sentence'
           const repeats = step.repeat ?? 1
-          subtitle = `Speed ${step.speed}% • Gap ${step.wait}s${repeats > 1 ? ` • Repeat ${repeats}x` : ''}`
+          subtitle = `Speed ${step.speed}% • Gap ${step.wait}s • Repeat ${repeats}x`
         }
         else { title = 'Unknown'; subtitle = '' }
         
@@ -40,7 +42,7 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
         const elementStyles = isActive ? {
           border: isPlaying ? (isPaused ? '2px solid #f59e0b' : '2px solid #3b82f6') : '2px solid #93c5fd',
           background: isPlaying ? (isPaused ? '#fffbeb' : '#eff6ff') : '#f0f9ff',
-          transform: isPlaying ? 'scale(1.02)' : 'scale(1.01)',
+          transform: 'scale(1.01)',
           boxShadow: isPlaying ? (isPaused ? '0 4px 12px rgba(245, 158, 11, 0.15)' : '0 4px 12px rgba(59, 130, 246, 0.15)') : '0 2px 8px rgba(147, 197, 253, 0.1)',
           cursor: 'pointer'
         } : {
@@ -82,12 +84,46 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ 
-                  ...iconStyles,
-                  transition: 'all 0.2s ease-in-out'
-                }}>
-                  ▰
-                </span>
+                {isActive ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onPlayPause?.()
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s ease-in-out'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(0, 0, 0, 0.1)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'none'
+                    }}
+                  >
+                    <span style={{ 
+                      ...iconStyles,
+                      fontSize: '16px',
+                      transition: 'all 0.2s ease-in-out'
+                    }}>
+                      {isPlaying ? (isPaused ? '▶' : '⏸') : '▶'}
+                    </span>
+                  </button>
+                ) : (
+                  <span style={{ 
+                    ...iconStyles,
+                    transition: 'all 0.2s ease-in-out'
+                  }}>
+                    ▰
+                  </span>
+                )}
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
                   <strong style={{ 
                     color: textStyles.titleColor,
@@ -121,82 +157,112 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
                     const isCurrentAudio = currentSubElement?.type === 'audio' && currentSubElement.index === chunkIndex
                     const isCurrentGap = currentSubElement?.type === 'gap' && currentSubElement.index === chunkIndex
                     const isSubElementPaused = isPlaying && isPaused
+                    const isSubElementActive = isCurrentAudio || isCurrentGap
                     
                     return (
                       <div key={chunkIndex} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        {/* Audio chunk */}
+                        {/* Grouped sub-element container */}
                         <div 
                           onClick={(e) => {
                             e.stopPropagation()
-                            onSubElementSelect?.('audio', chunkIndex)
+                            onSubElementSelect?.('audio', chunkIndex) // Always start from audio
                           }}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 6,
-                            padding: '4px 6px',
-                            borderRadius: 4,
-                            background: isCurrentAudio ? (isSubElementPaused ? '#fffbeb' : '#eff6ff') : '#f9fafb',
-                            border: isCurrentAudio ? (isSubElementPaused ? '1px solid #f59e0b' : '1px solid #3b82f6') : '1px solid #e5e7eb',
+                            gap: 8,
+                            padding: '6px 8px',
+                            borderRadius: 6,
+                            background: isSubElementActive ? (isSubElementPaused ? '#fffbeb' : '#eff6ff') : '#f9fafb',
+                            border: isSubElementActive ? (isSubElementPaused ? '1px solid #f59e0b' : '1px solid #3b82f6') : '1px solid #e5e7eb',
                             fontSize: '11px',
                             cursor: 'pointer',
                             transition: 'all 0.2s ease-in-out'
                           }}
                         >
-                          <span style={{ color: isCurrentAudio ? (isSubElementPaused ? '#f59e0b' : '#1d4ed8') : '#6b7280' }}>
-                            ▰
-                          </span>
-                          <span style={{ color: isCurrentAudio ? (isSubElementPaused ? '#92400e' : '#1e40af') : '#374151' }}>
-                            Audio chunk {chunkIndex + 1}
-                          </span>
-                          {isCurrentAudio && (
-                            <div style={{ flex: 1, marginLeft: 8 }}>
-                              <ProgressBar 
-                                current={isPlaying && progress ? progress.current : 0} 
-                                total={isPlaying && progress ? progress.total : (selectedSubElementDuration || 1000)} 
-                                isPaused={isPaused} 
-                              />
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Gap (if not last chunk) */}
-                        {chunkIndex < sentenceChunks.length - 1 && (
-                          <div 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              onSubElementSelect?.('gap', chunkIndex)
-                            }}
-                            style={{
+                          {/* Cycle counter - show for active chunk or when playing */}
+                          {(isSubElementActive || (currentCycle && currentCycle.chunkIndex === chunkIndex)) && (
+                            <div style={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: 6,
-                              padding: '4px 6px',
-                              borderRadius: 4,
-                            background: isCurrentGap ? (isSubElementPaused ? '#fffbeb' : '#eff6ff') : '#f9fafb',
-                            border: isCurrentGap ? (isSubElementPaused ? '1px solid #f59e0b' : '1px solid #3b82f6') : '1px solid #e5e7eb',
-                              fontSize: '11px',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s ease-in-out'
-                            }}
-                          >
-                            <span style={{ color: isCurrentGap ? (isSubElementPaused ? '#f59e0b' : '#1d4ed8') : '#6b7280' }}>
+                              justifyContent: 'center',
+                              minWidth: '32px',
+                              height: '20px',
+                              background: isSubElementPaused ? '#f59e0b' : '#3b82f6',
+                              color: 'white',
+                              borderRadius: '10px',
+                              fontSize: '10px',
+                              fontWeight: 'bold'
+                            }}>
+                              {currentCycle && currentCycle.chunkIndex === chunkIndex 
+                                ? `${currentCycle.cycle} / ${currentCycle.totalCycles}`
+                                : `1 / ${step.repeat ?? 1}`
+                              }
+                            </div>
+                          )}
+                          
+                          {/* Content container */}
+                          <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 2,
+                            flex: 1
+                          }}>
+                          {/* Audio chunk (visual only) */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            padding: '2px 4px',
+                            borderRadius: 3,
+                            background: isCurrentAudio ? (isSubElementPaused ? '#fef3c7' : '#dbeafe') : 'transparent',
+                            transition: 'all 0.2s ease-in-out'
+                          }}>
+                            <span style={{ color: isCurrentAudio ? (isSubElementPaused ? '#f59e0b' : '#1d4ed8') : '#6b7280' }}>
                               ▰
                             </span>
-                            <span style={{ color: isCurrentGap ? (isSubElementPaused ? '#92400e' : '#1e40af') : '#374151' }}>
-                              Gap {step.wait}s
+                            <span style={{ color: isCurrentAudio ? (isSubElementPaused ? '#92400e' : '#1e40af') : '#374151' }}>
+                              Audio chunk {chunkIndex + 1}
                             </span>
-                            {isCurrentGap && (
+                            {isCurrentAudio && (
                               <div style={{ flex: 1, marginLeft: 8 }}>
                                 <ProgressBar 
-                                  current={isPlaying && currentSubElement?.progress ? currentSubElement.progress.current : 0} 
-                                  total={isPlaying && currentSubElement?.progress ? currentSubElement.progress.total : (selectedSubElementDuration || 1000)} 
+                                  current={isPlaying && progress ? progress.current : 0} 
+                                  total={isPlaying && progress ? progress.total : (selectedSubElementDuration || 1000)} 
                                   isPaused={isPaused} 
                                 />
                               </div>
                             )}
                           </div>
-                        )}
+                          
+                          {/* Gap (visual only) */}
+                          <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 6,
+                              padding: '2px 4px',
+                              borderRadius: 3,
+                              background: isCurrentGap ? (isSubElementPaused ? '#fef3c7' : '#dbeafe') : 'transparent',
+                              transition: 'all 0.2s ease-in-out'
+                            }}>
+                              <span style={{ color: isCurrentGap ? (isSubElementPaused ? '#f59e0b' : '#1d4ed8') : '#6b7280' }}>
+                                ▰
+                              </span>
+                              <span style={{ color: isCurrentGap ? (isSubElementPaused ? '#92400e' : '#1e40af') : '#374151' }}>
+                                Gap {step.wait}s
+                              </span>
+                              {isCurrentGap && (
+                                <div style={{ flex: 1, marginLeft: 8 }}>
+                                  <ProgressBar 
+                                    current={isPlaying && currentSubElement?.progress ? currentSubElement.progress.current : 0} 
+                                    total={isPlaying && currentSubElement?.progress ? currentSubElement.progress.total : (selectedSubElementDuration || 1000)} 
+                                    isPaused={isPaused} 
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )
                   }) : (

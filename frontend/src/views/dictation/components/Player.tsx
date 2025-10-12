@@ -28,6 +28,7 @@ export function Player({
   const [sentenceChunks, setSentenceChunks] = useState<Array<{ audio_id: string }>>([])
   const [selectedSubElementDuration, setSelectedSubElementDuration] = useState<number | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0)
+  const [currentCycle, setCurrentCycle] = useState<{ chunkIndex: number; cycle: number; totalCycles: number } | null>(null)
   
   // Consolidated refs
   const playAbortRef = useRef<{ aborted: boolean; currentAudio?: HTMLAudioElement } | null>(null)
@@ -84,6 +85,7 @@ export function Player({
     setCurrentSubElement(null)
     setSentenceChunks([])
     setSelectedSubElementDuration(null)
+    setCurrentCycle(null)
   }
 
   // Unified duration fetching function
@@ -469,6 +471,9 @@ export function Player({
             for (let rep = 0; rep < repeats; rep++) {
               if (playAbortRef.current?.aborted) break
               
+              // Update cycle tracking
+              setCurrentCycle({ chunkIndex, cycle: rep + 1, totalCycles: repeats })
+              
               // Set current sub-element to audio chunk
               setCurrentSubElement({ type: 'audio', index: chunkIndex })
               
@@ -550,6 +555,7 @@ export function Player({
     // Select the new element and reset everything
     setActiveIndex(index)
     setCurrentSubElement(null)
+    setCurrentCycle(null)
     
     // Only clear duration if selecting a different element to avoid 1000ms flash
     if (activeIndex !== index) {
@@ -583,6 +589,7 @@ export function Player({
     // Always reset progress when selecting a sub-element
     setProgress(null)
     setCurrentSubElement({ type, index })
+    setCurrentCycle(null)
     // Duration caching is now handled by durationCache Map
     
     // Create a unique key for this sub-element selection
@@ -611,84 +618,48 @@ export function Player({
     }
   }
 
-  const handlePauseResume = () => {
-    if (isPaused) {
-      // Resume
-      setPaused(false)
-      if (playAbortRef.current?.currentAudio) {
-        try { 
-          playAbortRef.current.currentAudio.play().catch(err => {
-            console.error('Failed to resume audio:', err)
-          })
-        } catch {}
+  const handlePlayPause = () => {
+    if (!storyId || configSequence.length === 0) {
+      onPlayError('No story loaded or no configuration')
+      return
+    }
+    
+    if (isPlaying) {
+      if (isPaused) {
+        // Resume playback
+        setPaused(false)
+        if (playAbortRef.current?.currentAudio) {
+          try { 
+            playAbortRef.current.currentAudio.play().catch(err => {
+              console.error('Failed to resume audio:', err)
+            })
+          } catch {}
+        }
+        // Note: For gaps and wait elements, the pause state is handled by the wait loops
+        // No need to restart the sequence - it will continue from where it left off
+      } else {
+        // Pause playback
+        setPaused(true)
+        if (playAbortRef.current?.currentAudio) {
+          try { playAbortRef.current.currentAudio.pause() } catch {}
+        }
       }
-      // Note: For gaps and wait elements, the pause state is handled by the wait loops
-      // No need to restart the sequence - it will continue from where it left off
     } else {
-      // Pause
-      setPaused(true)
-      if (playAbortRef.current?.currentAudio) {
-        try { playAbortRef.current.currentAudio.pause() } catch {}
-      }
+      // Start playing
+      onPlayError(null)
+      setIsPlaying(true)
+      setPaused(false)
+      playSequence()
     }
   }
 
   return (
     <div style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: 12, background: 'white' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <div style={{ fontWeight: 600 }}>Player</div>
-        <button
-          onClick={isPlaying ? stopPlayback : playSequence}
-          disabled={!storyId || configSequence.length === 0}
-          style={{ 
-            padding: '6px 10px', 
-            borderRadius: 8, 
-            border: '1px solid #e5e7eb', 
-            background: '#f9fafb', 
-            cursor: (!storyId || configSequence.length === 0) ? 'not-allowed' : 'pointer',
-            opacity: (!storyId || configSequence.length === 0) ? 0.5 : 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}
-        >
-          <span>{isPlaying ? '⏹' : '▶'}</span>
-          <span>{isPlaying ? 'Stop' : 'Play'}</span>
-        </button>
-        <button
-          onClick={isPlaying ? handlePauseResume : undefined}
-          disabled={!isPlaying}
-          style={{ 
-            padding: '6px 10px', 
-            borderRadius: 8, 
-            border: '1px solid #e5e7eb', 
-            background: isPlaying ? (isPaused ? '#f0f9ff' : '#f9fafb') : '#f3f4f6',
-            cursor: isPlaying ? 'pointer' : 'not-allowed',
-            opacity: isPlaying ? 1 : 0.6,
-            color: isPlaying ? '#111827' : '#9ca3af',
-            transition: 'all 0.2s ease-in-out',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}
-          onMouseEnter={(e) => {
-            if (!isPlaying) {
-              e.currentTarget.style.background = '#f3f4f6'
-              e.currentTarget.style.borderColor = '#d1d5db'
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isPlaying) {
-              e.currentTarget.style.background = '#f3f4f6'
-              e.currentTarget.style.borderColor = '#e5e7eb'
-            }
-          }}
-        >
-          <span>{isPlaying ? (isPaused ? '▶' : '⏸') : '⏸'}</span>
-          <span>{isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Pause'}</span>
-        </button>
-        {playError && <span style={{ color: '#991b1b' }}>{playError}</span>}
-      </div>
+      {playError && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span style={{ color: '#991b1b' }}>{playError}</span>
+        </div>
+      )}
       <PlayerSequence 
         sequence={configSequence} 
         activeIndex={activeIndex}
@@ -700,6 +671,8 @@ export function Player({
         sentenceChunks={sentenceChunks}
         onSubElementSelect={handleSubElementSelect}
         selectedSubElementDuration={selectedSubElementDuration}
+        onPlayPause={handlePlayPause}
+        currentCycle={currentCycle}
       />
     </div>
   )
