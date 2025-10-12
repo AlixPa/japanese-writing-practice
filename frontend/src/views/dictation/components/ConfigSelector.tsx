@@ -5,10 +5,9 @@ interface Props {
   configs: ApiConfig[]
   value: string
   onChange: (id: string) => void
-  includeNew?: boolean
 }
 
-export function ConfigSelector({ configs, value, onChange, includeNew = true }: Props) {
+export function ConfigSelector({ configs, value, onChange }: Props) {
   return (
     <select
       value={value}
@@ -18,7 +17,6 @@ export function ConfigSelector({ configs, value, onChange, includeNew = true }: 
       {configs.map(c => (
         <option key={c.id} value={c.id}>{c.name}</option>
       ))}
-      {includeNew && <option value="">(New configuration)</option>}
     </select>
   )
 }

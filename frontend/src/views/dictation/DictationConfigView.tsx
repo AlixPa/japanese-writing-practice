@@ -81,10 +81,6 @@ export function DictationConfigView() {
   }
 
   const handleSelect = (id: string) => {
-    if (!id) {
-      setNewConfig()
-      return
-    }
     setSelectedId(id)
     const cfg = configs.find(c => c.id === id)
     if (cfg) {
@@ -146,7 +142,7 @@ export function DictationConfigView() {
     return (
       <section style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h1 style={{ margin: 0, fontSize: 24 }}>Dictation Configuration</h1>
+          <h1 style={{ margin: 0, fontSize: 24 }}>Configuration</h1>
           <div style={{ color: '#6b7280' }}>Loading configurations...</div>
         </div>
         <div style={{
@@ -174,10 +170,32 @@ export function DictationConfigView() {
           {toast.message}
         </div>
       )}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h1 style={{ margin: 0, fontSize: 24 }}>Dictation Configuration</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <h1 style={{ margin: 0, fontSize: 24 }}>Configuration</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <ConfigSelector configs={configs as any} value={selectedId || ''} onChange={handleSelect} />
+          <button 
+            onClick={() => {
+              const name = prompt('Enter configuration name:')
+              if (name && name.trim()) {
+                setNewConfig()
+                setNameDraft(name.trim())
+              }
+            }}
+            style={{ 
+              padding: '6px 8px', 
+              borderRadius: 8, 
+              border: '1px solid #d1fae5', 
+              background: '#ecfdf5', 
+              color: '#065f46', 
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: 'bold'
+            }}
+            title="Create new configuration"
+          >
+            +
+          </button>
           <input
             placeholder="Name"
             value={nameDraft}

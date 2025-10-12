@@ -17,8 +17,7 @@ export function DictationView() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <h1 style={{ margin: 0, fontSize: 24 }}>Dictation</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <label style={{ color: '#6b7280' }}>Configuration</label>
-          <ConfigSelector configs={configs} value={selectedConfigId} onChange={setSelectedConfigId} includeNew={false} />
+          <ConfigSelector configs={configs} value={selectedConfigId} onChange={setSelectedConfigId} />
         </div>
       </div>
       <div style={{

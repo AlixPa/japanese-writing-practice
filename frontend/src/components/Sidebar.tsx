@@ -9,8 +9,8 @@ interface SidebarProps {
 
 const menuItems: { key: TabKey; label: string }[] = [
   { key: 'sample1', label: 'Dictation' },
-  { key: 'sample2', label: 'Dictation Configuration' },
-  { key: 'sample3', label: 'Custom Generation' },
+  { key: 'sample2', label: 'Configuration' },
+  { key: 'sample3', label: 'Generation' },
 ]
 
 export function Sidebar({ activeTab, onChange }: SidebarProps) {

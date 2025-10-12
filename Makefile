@@ -13,13 +13,10 @@ stop:
 
 init-app:
 	@if [ ! -f .env ]; then cp .env_example .env; fi
-# 	reset db
-	@if [ -d .db ]; then rm -rf .db; fi
-	mkdir .db
-	chmod -R 777 .db
+	@if [ ! -d .db ]; then mkdir .db && chmod -R 777 .db; fi
 	$(MAKE) run-init-db
 
-app: stop init-app run-frontend run-backend
+app: init-app run-frontend run-backend
 # app-advanced: app run-voicevox
 
 frontend-dev:
@@ -33,14 +30,12 @@ clean:
 	docker volume prune -f
 
 clear-DANGER:
-	@echo "WARNING: This will remove ALL resources for japanese-writing-practice!"
+	@echo "WARNING: This will remove ALL resources for japanese-writing-practice."
 	@echo "Press Ctrl+C to abort or wait 5s..."
 	@sleep 5
-	-docker ps -a --filter "name=japanese-writing-practice" -q | xargs -r docker rm -f
-	-docker images --filter "reference=japanese-writing-practice*" -q | xargs -r docker rmi -f
-	-docker volume ls --filter "name=japanese-writing-practice" -q | xargs -r docker volume rm -f
+	$(COMPOSE) -p japanese-writing-practice down -v --rmi all --remove-orphans
 	rm -rf .db
-	@echo "All resources for japanese-writing-practice removed!"
+	@echo "All resources for japanese-writing-practice removed."
 
 .PHONY: $(foreach s,$(SERVICES),run-$(s) rebuild-$(s) logs-$(s)) \
 	stop clean app frontend-dev backend-dev clear-DANGER \

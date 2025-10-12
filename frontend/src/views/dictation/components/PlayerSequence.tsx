@@ -26,11 +26,11 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
         let title = ''
         let subtitle = ''
         if (hasWait && !hasSpeed) { title = 'Wait'; subtitle = `${step.wait}s` }
-        else if (!hasWait && hasSpeed) { title = 'Full dictation'; subtitle = `${step.speed}%` }
+        else if (!hasWait && hasSpeed) { title = 'Full dictation'; subtitle = `Speed ${step.speed}%` }
         else if (hasWait && hasSpeed) { 
           title = 'Sentence-by-sentence'
           const repeats = step.repeat ?? 1
-          subtitle = `${step.speed}% • gap ${step.wait}s${repeats > 1 ? ` • Repeat ${repeats}x` : ''}`
+          subtitle = `Speed ${step.speed}% • Gap ${step.wait}s${repeats > 1 ? ` • Repeat ${repeats}x` : ''}`
         }
         else { title = 'Unknown'; subtitle = '' }
         
