@@ -1,12 +1,19 @@
 COMPOSE   = docker compose --env-file .env
 
-SERVICES := backend mysql migration frontend voicevox init-db
+SERVICES := backend mysql migration frontend voicevox init-db web
 
 $(foreach s,$(SERVICES), \
   $(eval run-$(s): ; $$(COMPOSE) up -d $(s)) \
   $(eval rebuild-$(s): ; $$(COMPOSE) build --no-cache $(s) && $$(MAKE) run-$(s)) \
   $(eval logs-$(s): run-$(s) ; $$(COMPOSE) logs -f $(s)) \
 )
+
+# Web project commands
+web-build:
+	cd web && bun run build
+
+web-check:
+	cd web && bun run check:fix
 
 stop:
 	$(COMPOSE) stop
@@ -18,6 +25,10 @@ init-app:
 
 app: init-app run-frontend run-backend
 # app-advanced: app run-voicevox
+
+# Web development
+web-dev:
+	$(COMPOSE) watch web
 
 frontend-dev:
 	$(COMPOSE) watch frontend
@@ -39,4 +50,5 @@ clear-DANGER:
 
 .PHONY: $(foreach s,$(SERVICES),run-$(s) rebuild-$(s) logs-$(s)) \
 	stop clean app frontend-dev backend-dev clear-DANGER \
+	web-dev web-build web-check \
 # 	app-advanced

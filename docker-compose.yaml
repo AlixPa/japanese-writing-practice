@@ -98,6 +98,35 @@ services:
           path: ./frontend/package.json
     entrypoint: ["bun", "run", "dev", "--host"]
 
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    develop:
+      watch:
+        - action: sync
+          path: ./web/app
+          target: /web/app
+          ignore: 
+            - node_modules/
+            - .next/
+        - action: sync
+          path: ./web/components
+          target: /web/components
+          ignore: 
+            - node_modules/
+            - .next/
+        - action: sync
+          path: ./web/lib
+          target: /web/lib
+          ignore: 
+            - node_modules/
+            - .next/
+        - action: rebuild
+          path: ./web/package.json
+
   voicevox:
     image: voicevox/voicevox_engine:cpu-latest
     container_name: voicevox
