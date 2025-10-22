@@ -3,7 +3,6 @@ FROM python:3.13.3
 # Set working directory
 WORKDIR /backend
 COPY ./backend /backend
-COPY ./.env /.env
 
 RUN apt-get update && apt-get install -y default-mysql-client
 

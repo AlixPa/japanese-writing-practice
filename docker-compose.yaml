@@ -22,30 +22,34 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+    env_file:
+      - .env
     depends_on:
       mysql:
         condition: service_healthy
     environment:
       MYSQL_HOST: mysql
-      MYSQL_PORT: ${MYSQL_PORT}
     entrypoint: ["alembic", "upgrade", "head"]
   
   init-db:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+    env_file:
+      - .env
     depends_on:
       migration:
         condition: service_completed_successfully
     environment:
       MYSQL_HOST: mysql
-      MYSQL_PORT: ${MYSQL_PORT}
     entrypoint: ["python", "-m", "src.init_db"]
     
   backend:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
+    env_file:
+      - .env
     depends_on:
       mysql:
         condition: service_healthy
@@ -83,6 +87,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.frontend
+    env_file:
+      - .env
     environment:
       BACKEND_HOST: http://backend
     ports:
