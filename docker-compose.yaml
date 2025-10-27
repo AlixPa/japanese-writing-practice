@@ -103,7 +103,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.web
     ports:
-      - "${WEB_PORT:-3000}:3000"
+      - "${WEB_PORT}:${WEB_PORT}"
     develop:
       watch:
         - action: sync
@@ -126,6 +126,7 @@ services:
             - .next/
         - action: rebuild
           path: ./web/package.json
+    entrypoint: ["bun", "run", "dev"]
 
   voicevox:
     image: voicevox/voicevox_engine:cpu-latest
