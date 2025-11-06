@@ -29,12 +29,8 @@ async def get_sentence_metadata(story_id: str, speed: int) -> list[AudioMetadata
         raise HTTPWrongAttributesException(str(e))
 
 
-@router.get("/{audio_id}", response_class=Response)
-async def get_audio(audio_id: str):
-    logger.info(f"On GET /audio/{{audio_id}} with {audio_id=}")
-    try:
-        audio_bytes = await load_audio_bytes(audio_id)
-    except WrongArgumentException as e:
-        raise HTTPWrongAttributesException(str(e))
-
+@router.get("/{filename}", response_class=Response)
+async def get_audio(filename: str):
+    logger.info(f"On GET /audio/{{filename}} with {filename=}")
+    audio_bytes = await load_audio_bytes(filename)
     return Response(content=audio_bytes, media_type="audio/wav")

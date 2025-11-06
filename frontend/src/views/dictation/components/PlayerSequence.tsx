@@ -9,7 +9,7 @@ interface Props {
   isPaused?: boolean
   progress?: { current: number; total: number } | null
   currentSubElement?: { type: 'audio' | 'gap', index: number, progress?: { current: number; total: number } } | null
-  sentenceChunks?: Array<{ audio_id: string }>
+  sentenceChunks?: Array<{ audio_url: string }>
   onSubElementSelect?: (type: 'audio' | 'gap', index: number) => void
   selectedSubElementDuration?: number | null
   onPlayPause?: () => void

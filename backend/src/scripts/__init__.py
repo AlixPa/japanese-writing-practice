@@ -1,3 +1,4 @@
+from .s3_presigned_url import s3_presigned_url_main
 from .s3_test import s3_test_main
 from .s3_upload_audios import s3_upload_audios_main
 from .sample import main as sample_main
@@ -7,6 +8,7 @@ from .test_audio_voices import test_audio_voices_main
 from .wanikani_generation import wanikani_gen_prev_seed, wanikani_generation_main
 
 __all__ = [
+    "s3_presigned_url_main",
     "s3_test_main",
     "s3_upload_audios_main",
     "sample_main",
