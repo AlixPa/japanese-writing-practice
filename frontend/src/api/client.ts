@@ -9,7 +9,7 @@ export type GetConfigsResponse = ApiConfig[]
 export interface StoryResponse { story_id: string; story_title?: string; story_text: string }
 export type StoriesResponse = StoryResponse[]
 
-export interface AudioMetadata { audio_text: string; audio_id: string }
+export interface AudioMetadata { audio_text: string; audio_url: string }
 export type SentenceMetadataResponse = AudioMetadata[]
 
 async function apiFetch<T = unknown>(input: RequestInfo, init?: RequestInit): Promise<T> {
@@ -30,12 +30,7 @@ export const api = {
 
   getStory: (level: number) => apiFetch<StoriesResponse>(`/api/story/wanikani?level=${encodeURIComponent(level)}`),
   getAudioMetadata: (storyId: string, speed: number) => apiFetch<AudioMetadata>(`/api/audio/metadata?story_id=${encodeURIComponent(storyId)}&speed=${encodeURIComponent(speed)}`),
-  getSentenceMetadata: (storyId: string, speed: number) => apiFetch<SentenceMetadataResponse>(`/api/audio/metadata/sentence?story_id=${encodeURIComponent(storyId)}&speed=${encodeURIComponent(speed)}`),
-  getAudioBlob: async (audioId: string) => {
-    const res = await fetch(`/api/audio/${encodeURIComponent(audioId)}`)
-    if (!res.ok) throw new Error('Failed to fetch audio')
-    return await res.blob()
-  }
+  getSentenceMetadata: (storyId: string, speed: number) => apiFetch<SentenceMetadataResponse>(`/api/audio/metadata/sentence?story_id=${encodeURIComponent(storyId)}&speed=${encodeURIComponent(speed)}`)
 }
 
 

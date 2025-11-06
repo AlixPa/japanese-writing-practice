@@ -6,9 +6,8 @@ interface PlayerProps {
   configSequence: Array<{ wait?: number; speed?: number; repeat?: number }>
   onPlayError: (error: string | null) => void
   playError: string | null
-  onGetAudioMetadata: (storyId: string, speed: number) => Promise<{ audio_id: string }>
-  onGetSentenceMetadata: (storyId: string, speed: number) => Promise<Array<{ audio_id: string }>>
-  onGetAudioBlob: (audioId: string) => Promise<Blob>
+  onGetAudioMetadata: (storyId: string, speed: number) => Promise<{ audio_text: string; audio_url: string }>
+  onGetSentenceMetadata: (storyId: string, speed: number) => Promise<Array<{ audio_text: string; audio_url: string }>>
 }
 
 export function Player({ 
@@ -17,15 +16,14 @@ export function Player({
   onPlayError, 
   playError, 
   onGetAudioMetadata, 
-  onGetSentenceMetadata,
-  onGetAudioBlob
+  onGetSentenceMetadata
 }: PlayerProps) {
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
   const [isPaused, setIsPaused] = useState<boolean>(false)
   const [activeIndex, setActiveIndex] = useState<number | null>(0)
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null)
   const [currentSubElement, setCurrentSubElement] = useState<{ type: 'audio' | 'gap', index: number, progress?: { current: number; total: number } } | null>(null)
-  const [sentenceChunks, setSentenceChunks] = useState<Array<{ audio_id: string }>>([])
+  const [sentenceChunks, setSentenceChunks] = useState<Array<{ audio_url: string }>>([])
   const [selectedSubElementDuration, setSelectedSubElementDuration] = useState<number | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0)
   const [currentCycle, setCurrentCycle] = useState<{ chunkIndex: number; cycle: number; totalCycles: number } | null>(null)
@@ -34,8 +32,20 @@ export function Player({
   const playAbortRef = useRef<{ aborted: boolean; currentAudio?: HTMLAudioElement } | null>(null)
   const isPausedRef = useRef<boolean>(false)
   
-  // Audio cache: audio_id -> Blob
-  const audioCache = useRef<Map<string, Blob>>(new Map())
+  // Unified cache: stores both metadata and audio blob together
+  // Key: `${storyId}-${speed}` for full audio
+  // Value: { metadata: { audio_text, audio_url }, audioBlob: Blob }
+  const audioCache = useRef<Map<string, { metadata: { audio_text: string; audio_url: string }; audioBlob: Blob }>>(new Map())
+  
+  // Sentence chunks cache: stores array of metadata + audio blobs
+  // Key: `${storyId}-${speed}`
+  // Value: Array<{ metadata: { audio_text, audio_url }, audioBlob: Blob }>
+  const sentenceChunksCache = useRef<Map<string, Array<{ metadata: { audio_text: string; audio_url: string }; audioBlob: Blob }>>>(new Map())
+  
+  // Pending requests: tracks in-flight fetches to prevent duplicates
+  const pendingAudioRequests = useRef<Map<string, Promise<{ metadata: { audio_text: string; audio_url: string }; audioBlob: Blob }>>>(new Map())
+  const pendingSentenceRequests = useRef<Map<string, Promise<Array<{ metadata: { audio_text: string; audio_url: string }; audioBlob: Blob }>>>>(new Map())
+  
   const currentStoryIdRef = useRef<string | null>(storyId)
   
   // Duration cache: selectionKey -> duration
@@ -112,15 +122,17 @@ export function Player({
       // Sentence-by-sentence element - set up default sub-element and fetch duration
       setCurrentSubElement({ type: 'audio', index: 0 })
       
-      // Fetch sentence metadata to show sub-elements
+      // Fetch sentence chunks from cache (or fetch if not cached)
       try {
         const speed = step.speed || 100
-        const payload = await onGetSentenceMetadata(storyId, speed)
-        const list = payload || []
+        const chunks = await getOrFetchSentenceChunks(speed)
+        
+        // Update sentenceChunks state with just metadata for display
+        const list = chunks.map(chunk => ({ audio_url: chunk.metadata.audio_url }))
         setSentenceChunks(list)
         
         // Fetch duration for the first audio chunk (default selection)
-        if (list.length > 0) {
+        if (chunks.length > 0) {
           const defaultSubElementKey = `${storyId}-${index}-audio-0`
           
           // Check cache first
@@ -128,8 +140,8 @@ export function Player({
             const cachedDuration = durationCache.current.get(defaultSubElementKey)!
             setSelectedSubElementDuration(cachedDuration)
           } else {
-            // Fetch from API if not in cache
-            const duration = await getAudioDurationFromId(list[0].audio_id)
+            // Get duration from cached blob
+            const duration = await getAudioDurationFromBlob(chunks[0].audioBlob)
             setSelectedSubElementDuration(duration)
             
             // Cache the duration for the default sub-element selection
@@ -217,6 +229,9 @@ export function Player({
     // Clear caches if story changed
     if (currentStoryIdRef.current !== storyId) {
       audioCache.current.clear()
+      sentenceChunksCache.current.clear()
+      pendingAudioRequests.current.clear()
+      pendingSentenceRequests.current.clear()
       durationCache.current.clear()
       currentStoryIdRef.current = storyId
     }
@@ -231,20 +246,88 @@ export function Player({
   }, [storyId])
 
 
-  // Playback helpers
-  const fetchAudioBlob = async (audioId: string): Promise<Blob> => {
+  // Unified cache helper: get or fetch full audio metadata + blob
+  const getOrFetchAudio = async (speed: number): Promise<{ metadata: { audio_text: string; audio_url: string }; audioBlob: Blob }> => {
+    const cacheKey = `${storyId}-${speed}`
+    
     // Check cache first
-    if (audioCache.current.has(audioId)) {
-      return audioCache.current.get(audioId)!
+    if (audioCache.current.has(cacheKey)) {
+      return audioCache.current.get(cacheKey)!
     }
     
-    // Fetch from API if not in cache
-    const blob = await onGetAudioBlob(audioId)
+    // Check if there's already a pending request for this key
+    if (pendingAudioRequests.current.has(cacheKey)) {
+      return await pendingAudioRequests.current.get(cacheKey)!
+    }
     
-    // Store in cache
-    audioCache.current.set(audioId, blob)
+    // Start new fetch and store promise in pending requests
+    const fetchPromise = (async () => {
+      try {
+        // Fetch metadata from backend
+        const metadata = await onGetAudioMetadata(storyId, speed)
+        
+        // Fetch audio blob from S3
+        const res = await fetch(metadata.audio_url)
+        if (!res.ok) throw new Error('Failed to fetch audio from URL')
+        const audioBlob = await res.blob()
+        
+        // Store in cache
+        const cached = { metadata, audioBlob }
+        audioCache.current.set(cacheKey, cached)
+        
+        return cached
+      } finally {
+        // Remove from pending requests when done (success or error)
+        pendingAudioRequests.current.delete(cacheKey)
+      }
+    })()
     
-    return blob
+    pendingAudioRequests.current.set(cacheKey, fetchPromise)
+    return await fetchPromise
+  }
+  
+  // Unified cache helper: get or fetch sentence chunks metadata + blobs
+  const getOrFetchSentenceChunks = async (speed: number): Promise<Array<{ metadata: { audio_text: string; audio_url: string }; audioBlob: Blob }>> => {
+    const cacheKey = `${storyId}-${speed}`
+    
+    // Check cache first
+    if (sentenceChunksCache.current.has(cacheKey)) {
+      return sentenceChunksCache.current.get(cacheKey)!
+    }
+    
+    // Check if there's already a pending request for this key
+    if (pendingSentenceRequests.current.has(cacheKey)) {
+      return await pendingSentenceRequests.current.get(cacheKey)!
+    }
+    
+    // Start new fetch and store promise in pending requests
+    const fetchPromise = (async () => {
+      try {
+        // Fetch sentence metadata from backend
+        const sentenceMetadata = await onGetSentenceMetadata(storyId, speed)
+        
+        // Fetch all audio blobs from S3 in parallel
+        const chunks = await Promise.all(
+          sentenceMetadata.map(async (meta) => {
+            const res = await fetch(meta.audio_url)
+            if (!res.ok) throw new Error('Failed to fetch audio from URL')
+            const audioBlob = await res.blob()
+            return { metadata: meta, audioBlob }
+          })
+        )
+        
+        // Store in cache
+        sentenceChunksCache.current.set(cacheKey, chunks)
+        
+        return chunks
+      } finally {
+        // Remove from pending requests when done (success or error)
+        pendingSentenceRequests.current.delete(cacheKey)
+      }
+    })()
+    
+    pendingSentenceRequests.current.set(cacheKey, fetchPromise)
+    return await fetchPromise
   }
   
   // Helper function to handle pause-aware waiting
@@ -273,20 +356,14 @@ export function Player({
   // Simplified duration fetching
   const getWaitDuration = (waitTime: number) => waitTime * 1000
   
-  const getAudioDurationFromId = async (audioId: string) => {
-    try {
-      const audioBlob = await fetchAudioBlob(audioId)
-      return await getAudioDuration(audioBlob)
-    } catch (e) {
-      console.error('Failed to fetch audio duration:', e)
-      return null
-    }
+  const getAudioDurationFromBlob = (audioBlob: Blob): Promise<number> => {
+    return getAudioDuration(audioBlob)
   }
   
   const getMainAudioDuration = async (speed: number) => {
     try {
-      const meta = await onGetAudioMetadata(storyId, speed)
-      return await getAudioDurationFromId(meta.audio_id)
+      const cached = await getOrFetchAudio(speed)
+      return await getAudioDurationFromBlob(cached.audioBlob)
     } catch (e) {
       console.error('Failed to fetch main audio duration:', e)
       return null
@@ -404,20 +481,20 @@ export function Player({
         }
         if (!hasWait && hasSpeed) {
           const speed = step.speed || 100
-          const meta = await onGetAudioMetadata(storyId, speed)
+          const cached = await getOrFetchAudio(speed)
           if (playAbortRef.current?.aborted) break
-          const blob = await fetchAudioBlob(meta.audio_id)
-          if (playAbortRef.current?.aborted) break
-          await playAudioBlob(blob)
+          await playAudioBlob(cached.audioBlob)
           continue
         }
         if (hasWait && hasSpeed) {
           if (playAbortRef.current?.aborted) break
           const speed = step.speed || 100
           const gapMs = Math.max(0, Math.round((step.wait || 0) * 1000))
-          const payload = await onGetSentenceMetadata(storyId, speed)
+          const chunks = await getOrFetchSentenceChunks(speed)
           if (playAbortRef.current?.aborted) break
-          const list = payload || []
+          
+          // Update sentenceChunks state with just metadata for display
+          const list = chunks.map(chunk => ({ audio_url: chunk.metadata.audio_url }))
           setSentenceChunks(list)
           
           // Determine starting point based on current sub-element
@@ -477,9 +554,10 @@ export function Player({
               // Set current sub-element to audio chunk
               setCurrentSubElement({ type: 'audio', index: chunkIndex })
               
-              const blob = await fetchAudioBlob(item.audio_id)
+              // Use cached blob from chunks array
+              const chunk = chunks[chunkIndex]
               if (playAbortRef.current?.aborted) break
-              await playAudioBlob(blob)
+              await playAudioBlob(chunk.audioBlob)
               if (playAbortRef.current?.aborted) break
               
               // Add gap after each repeat (except the last repeat of the last chunk)
@@ -605,8 +683,18 @@ export function Player({
     // Fetch duration for progress bar display
     let duration: number | null = null
     
-    if (type === 'audio' && sentenceChunks && sentenceChunks[index]) {
-      duration = await getAudioDurationFromId(sentenceChunks[index].audio_id)
+    if (type === 'audio' && activeIndex !== null) {
+      const step = configSequence[activeIndex]
+      const speed = step.speed || 100
+      try {
+        // Get cached chunks and use the blob for duration
+        const chunks = await getOrFetchSentenceChunks(speed)
+        if (chunks[index]) {
+          duration = await getAudioDurationFromBlob(chunks[index].audioBlob)
+        }
+      } catch (e) {
+        console.error('Failed to fetch audio duration:', e)
+      }
     } else if (type === 'gap' && activeIndex !== null) {
       const step = configSequence[activeIndex]
       duration = getWaitDuration(step.wait || 0)

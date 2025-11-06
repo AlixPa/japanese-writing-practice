@@ -1,5 +1,6 @@
 from logging import Logger
 from pathlib import Path
+from typing import Literal
 
 import boto3
 from src.config.env_var import aws_config
@@ -52,3 +53,17 @@ class S3Client:
 
     def close(self) -> None:
         self.client.close()
+
+    def presigned_url(
+        self,
+        bucket: str,
+        prefix: str,
+        filename: str,
+        expires_in_s: int = 1800,
+        client_method: Literal["get_object"] = "get_object",
+    ) -> str:
+        return self.client.generate_presigned_url(
+            ClientMethod=client_method,
+            Params=dict(Bucket=bucket, Key=f"{prefix}/{filename}"),
+            ExpiresIn=expires_in_s,
+        )

@@ -1,5 +1,8 @@
+import os
 from dataclasses import dataclass
 from pathlib import Path
+
+USES_LOCAL_FILES = os.environ.get("USES_LOCAL_FILES") == "True"
 
 
 @dataclass(frozen=True)

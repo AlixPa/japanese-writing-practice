@@ -140,7 +140,6 @@ export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: stri
             playError={playError}
             onGetAudioMetadata={api.getAudioMetadata}
             onGetSentenceMetadata={api.getSentenceMetadata}
-            onGetAudioBlob={api.getAudioBlob}
           />
         </>
       )}
