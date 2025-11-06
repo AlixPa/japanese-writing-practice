@@ -110,6 +110,8 @@ services:
       dockerfile: docker/Dockerfile.web
     ports:
       - "${WEB_PORT}:${WEB_PORT}"
+    env_file:
+      - .env
     develop:
       watch:
         - action: sync
