@@ -1,33 +1,33 @@
-class SqlNoConnectionError(Exception):
+class SqliteNoConnectionError(Exception):
     def __init__(self, detail: str | None = None) -> None:
         super().__init__(detail)
 
 
-class SqlNoValueInsertionError(Exception):
+class SqliteNoValueInsertionError(Exception):
     def __init__(self):
         super().__init__("No value given to insert.")
 
 
-class SqlColumnInconsistencyError(Exception):
+class SqliteColumnInconsistencyError(Exception):
     def __init__(self, detail: str | None = None) -> None:
         super().__init__(detail)
 
 
-class SqlDuplicateColumnUpdateError(Exception):
+class SqliteDuplicateColumnUpdateError(Exception):
     def __init__(self, column: str):
         super().__init__(f"Updating multiple time the same column, {column=}")
 
 
-class SqlNoUpdateValuesError(Exception):
+class SqliteNoUpdateValuesError(Exception):
     def __init__(self):
         super().__init__("Nothing given to update.")
 
 
-class SqlWrongQueryError(Exception):
+class SqliteWrongQueryError(Exception):
     def __init__(self, detail: str | None = None) -> None:
         super().__init__(detail)
 
 
-class SqlIdNotFoundError(Exception):
+class SqliteIdNotFoundError(Exception):
     def __init__(self, detail: str | None = None) -> None:
         super().__init__(detail)

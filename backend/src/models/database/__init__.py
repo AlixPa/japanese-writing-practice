@@ -1,20 +1,19 @@
-from .audio import Audio as AudioTable
-from .base import Base, BaseTableModel
-from .config import Config as ConfigTable
-from .story import Story as StoryTable
-from .story_audio import StoryAudio as StoryAudioTable
-from .story_chunk import StoryChunk as StoryChunkTable
-from .story_chunk_audio import StoryChunkAudio as StoryChunkAudioTable
-from .wanikani_story import WanikaniStory as WanikaniStoryTable
+from .audios import Audios
+from .base import BaseTableModel
+from .configs import Configs
+from .stories import Stories
+from .story_audios import StoryAudios
+from .story_chunk_audios import StoryChunkAudios
+from .story_chunks import StoryChunks
+from .wanikani_stories import WanikaniStories
 
 __all__ = [
-    "AudioTable",
-    "Base",
+    "Audios",
     "BaseTableModel",
-    "ConfigTable",
-    "StoryAudioTable",
-    "StoryChunkTable",
-    "StoryChunkAudioTable",
-    "StoryTable",
-    "WanikaniStoryTable",
+    "Configs",
+    "StoryAudios",
+    "StoryChunks",
+    "StoryChunkAudios",
+    "Stories",
+    "WanikaniStories",
 ]

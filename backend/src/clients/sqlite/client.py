@@ -9,12 +9,12 @@ from src.logger import get_logger
 from src.models.database import BaseTableModel
 
 from .exceptions import (
-    SqlColumnInconsistencyError,
-    SqlDuplicateColumnUpdateError,
-    SqlIdNotFoundError,
-    SqlNoConnectionError,
-    SqlNoUpdateValuesError,
-    SqlNoValueInsertionError,
+    SqliteColumnInconsistencyError,
+    SqliteDuplicateColumnUpdateError,
+    SqliteIdNotFoundError,
+    SqliteNoConnectionError,
+    SqliteNoUpdateValuesError,
+    SqliteNoValueInsertionError,
 )
 
 GenericTableModel = TypeVar("GenericTableModel", bound=BaseTableModel)
@@ -31,6 +31,7 @@ class SQLiteClient(ABC):
         if self.connection:
             self.connection.close()
         self.connection = sqlite3.connect(path_config.sqlite_db)
+        self.connection.row_factory = sqlite3.Row
 
     def _logging(
         self, cursor: sqlite3.Cursor, query: str, params: tuple | None
@@ -119,7 +120,7 @@ class SQLiteClient(ABC):
             Results of the query execution
         """
         if not self.connection:
-            raise SqlNoConnectionError("Could not execute query, no connection yet.")
+            raise SqliteNoConnectionError("Could not execute query, no connection yet.")
         self.cursor = self.connection.cursor()
         try:
             self.cursor.execute(query, args or ())
@@ -134,9 +135,41 @@ class SQLiteClient(ABC):
         self.cursor = None
         return res
 
+    @overload
     def count(
         self,
-        table_name: str,
+        table: str,
+        select_col: list[str] = list(),
+        cond_null: list[str] = list(),
+        cond_not_null: list[str] = list(),
+        cond_in: dict[str, list] = dict(),
+        cond_equal: dict[str, object] = dict(),
+        cond_non_equal: dict[str, object] = dict(),
+        cond_less_or_eq: dict[str, object] = dict(),
+        cond_greater_or_eq: dict[str, object] = dict(),
+        cond_less: dict[str, object] = dict(),
+        cond_greater: dict[str, object] = dict(),
+    ) -> int: ...
+
+    @overload
+    def count(
+        self,
+        table: Type[GenericTableModel],
+        select_col: list[str] = list(),
+        cond_null: list[str] = list(),
+        cond_not_null: list[str] = list(),
+        cond_in: dict[str, list] = dict(),
+        cond_equal: dict[str, object] = dict(),
+        cond_non_equal: dict[str, object] = dict(),
+        cond_less_or_eq: dict[str, object] = dict(),
+        cond_greater_or_eq: dict[str, object] = dict(),
+        cond_less: dict[str, object] = dict(),
+        cond_greater: dict[str, object] = dict(),
+    ) -> int: ...
+
+    def count(
+        self,
+        table: str | Type[GenericTableModel],
         select_col: list[str] = list(),
         cond_null: list[str] = list(),
         cond_not_null: list[str] = list(),
@@ -153,8 +186,8 @@ class SQLiteClient(ABC):
 
         Parameters
         ----------
-        table_name : str
-            Name of the table to query
+        table : str
+            Table to query
         select_col : list[str], optional
             List of columns to include in the COUNT(...), by default all columns
         cond_null : list[str], optional
@@ -183,6 +216,7 @@ class SQLiteClient(ABC):
         None
             if query went wrong
         """
+        table_name = table if isinstance(table, str) else table.__tablename__
         query_parts = [
             f"SELECT COUNT({', '.join(select_col) if select_col else '*'}) AS ct FROM {table_name}"
         ]
@@ -204,8 +238,8 @@ class SQLiteClient(ABC):
         res_Sql = self.execute(query=" ".join(query_parts), args=args)
         if not res_Sql:
             return None
-        res = res_Sql[0].get("ct", None)
-        return int(str(res)) if res else None
+        res = res_Sql[0]["ct"]
+        return int(str(res))
 
     @overload
     def select(
@@ -383,7 +417,7 @@ class SQLiteClient(ABC):
                 cond_equal={"id": id},
             )
         if not res_Sql:
-            raise SqlIdNotFoundError(
+            raise SqliteIdNotFoundError(
                 f"{id=} not found during select in table {table if isinstance(table, str) else table.__tablename__}"
             )
         return res_Sql[0]
@@ -410,7 +444,7 @@ class SQLiteClient(ABC):
         try:
             self.select_by_id(table=table, id=id)
             return True
-        except SqlIdNotFoundError:
+        except SqliteIdNotFoundError:
             return False
 
     def start_transaction(self) -> None:
@@ -421,7 +455,7 @@ class SQLiteClient(ABC):
         Commits the transaction.
         """
         if not self.connection:
-            raise SqlNoConnectionError("Cannot commit if transaction is closed.")
+            raise SqliteNoConnectionError("Cannot commit if transaction is closed.")
         self.connection.commit()
         self.connection.close()
         self._connect()
@@ -431,7 +465,7 @@ class SQLiteClient(ABC):
         Rollback the transaction.
         """
         if not self.connection:
-            raise SqlNoConnectionError("Cannot commit if transaction is closed.")
+            raise SqliteNoConnectionError("Cannot commit if transaction is closed.")
         self.connection.rollback()
         self.connection.close()
         self._connect()
@@ -524,7 +558,7 @@ class SQLiteClient(ABC):
             to_insert_dict = cast(list[dict[str, object]], to_insert)
         else:
             to_insert = cast(list[GenericTableModel], to_insert)
-            to_insert_dict = [e.to_dict() for e in to_insert]
+            to_insert_dict = [e.model_dump() for e in to_insert]
 
         for row in to_insert_dict:
             if "createdAt" in row:
@@ -534,18 +568,18 @@ class SQLiteClient(ABC):
 
         to_insert_dict = [row for row in to_insert_dict if row]
         if not to_insert_dict:
-            raise SqlNoValueInsertionError()
+            raise SqliteNoValueInsertionError()
 
         cols = set(to_insert_dict[0].keys())
         for row in to_insert_dict:
             for col in cols:
                 if not col in row:
-                    raise SqlColumnInconsistencyError(
+                    raise SqliteColumnInconsistencyError(
                         f"{col=} is not in one of the row to insert: {row=}"
                     )
             for col in row:
                 if not col in cols:
-                    raise SqlColumnInconsistencyError(
+                    raise SqliteColumnInconsistencyError(
                         f"{col=} is not in the first row to insert: col_of_first_row={cols}"
                     )
         cols = list(cols)
@@ -664,14 +698,14 @@ class SQLiteClient(ABC):
             del update_col_value["createdAt"]
 
         if not update_col_col and not update_col_value:
-            raise SqlNoUpdateValuesError()
+            raise SqliteNoUpdateValuesError()
 
         for col in update_col_col:
             if col in update_col_value:
-                raise (SqlDuplicateColumnUpdateError(column=col))
+                raise (SqliteDuplicateColumnUpdateError(column=col))
         for col in update_col_value:
             if col in update_col_col:
-                raise (SqlDuplicateColumnUpdateError(column=col))
+                raise (SqliteDuplicateColumnUpdateError(column=col))
 
         ids_to_update = self.select(
             table=table_name,
@@ -750,7 +784,7 @@ class SQLiteClient(ABC):
             Dictionary mapping columns to update with specific values
         """
         if not self.id_exists(table=table, id=id):
-            raise SqlIdNotFoundError(
+            raise SqliteIdNotFoundError(
                 f"{id=} not found during update in table {table if isinstance(table, str) else table.__tablename__}"
             )
         self.update(
@@ -895,7 +929,7 @@ class SQLiteClient(ABC):
         res_Sql = self.delete(table=table, cond_equal={"id": id})
 
         if not res_Sql:
-            raise SqlIdNotFoundError(
+            raise SqliteIdNotFoundError(
                 f"{id=} not found during delete in table {table if isinstance(table, str) else table.__tablename__}"
             )
         return res_Sql[0]

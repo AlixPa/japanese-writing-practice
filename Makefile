@@ -1,6 +1,6 @@
 COMPOSE   = docker compose --env-file .env
 
-SERVICES := backend mysql migration frontend voicevox init-db web
+SERVICES := backend frontend voicevox web
 
 $(foreach s,$(SERVICES), \
   $(eval run-$(s): ; $$(COMPOSE) up -d $(s)) \
@@ -20,8 +20,6 @@ stop:
 
 init-app:
 	@if [ ! -f .env ]; then cp .env_example .env; fi
-	@if [ ! -d .db ]; then mkdir .db && chmod -R 777 .db; fi
-	$(MAKE) run-init-db
 
 app: init-app run-frontend run-backend
 # app-advanced: app run-voicevox
@@ -45,10 +43,13 @@ clear-DANGER:
 	@echo "Press Ctrl+C to abort or wait 5s..."
 	@sleep 5
 	$(COMPOSE) -p japanese-writing-practice down -v --rmi all --remove-orphans
-	rm -rf .db
 	@echo "All resources for japanese-writing-practice removed."
+
+new-migration:
+	./scripts/new_migration.sh "$(NAME)"
 
 .PHONY: $(foreach s,$(SERVICES),run-$(s) rebuild-$(s) logs-$(s)) \
 	stop clean app frontend-dev backend-dev clear-DANGER \
 	web-dev web-build web-check \
+	new-migration
 # 	app-advanced
