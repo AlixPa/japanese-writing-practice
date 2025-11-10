@@ -1,60 +1,11 @@
 services:
-  mysql:
-    image: mysql:8.0
-    command: --port=${MYSQL_PORT}
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "${MYSQL_PORT}:${MYSQL_PORT}"
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -P ${MYSQL_PORT} -u root -p$$MYSQL_ROOT_PASSWORD"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
-    volumes:
-      - ./.db:/var/lib/mysql
-
-  migration:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.backend
-    env_file:
-      - .env
-    depends_on:
-      mysql:
-        condition: service_healthy
-    environment:
-      MYSQL_HOST: mysql
-    entrypoint: ["alembic", "upgrade", "head"]
-  
-  init-db:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.backend
-    env_file:
-      - .env
-    depends_on:
-      migration:
-        condition: service_completed_successfully
-    environment:
-      MYSQL_HOST: mysql
-    entrypoint: ["python", "-m", "src.init_db"]
-    
   backend:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
     env_file:
       - .env
-    depends_on:
-      mysql:
-        condition: service_healthy
     environment:
-      MYSQL_HOST: mysql
       VOICEVOX_HOST: voicevox
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"

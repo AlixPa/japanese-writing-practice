@@ -1,6 +1,6 @@
-from src.clients.mysql import AMysqlClientReader
+from src.clients.sqlite import SQLiteClient
 from src.logger import get_logger
-from src.models.database import StoryTable, WanikaniStoryTable
+from src.models.database import Stories, WanikaniStories
 
 from .models import StoryMetadata
 
@@ -8,13 +8,13 @@ logger = get_logger()
 
 
 async def load_wanikani_stories(level: int) -> list[StoryMetadata]:
-    mysql_reader = AMysqlClientReader(logger)
+    sqlite = SQLiteClient(logger)
 
-    wanikani_stories = await mysql_reader.select(
-        table=WanikaniStoryTable, cond_equal=dict(level=level)
+    wanikani_stories = sqlite.select(
+        table=WanikaniStories, cond_equal=dict(level=level)
     )
-    stories = await mysql_reader.select(
-        table=StoryTable, cond_in=dict(id=[s.storyId for s in wanikani_stories])
+    stories = sqlite.select(
+        table=Stories, cond_in=dict(id=[s.story_id for s in wanikani_stories])
     )
 
     return [

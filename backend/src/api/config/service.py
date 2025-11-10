@@ -1,13 +1,9 @@
 import json
 
-from src.clients.mysql import (
-    AMysqlClientReader,
-    AMysqlClientWriter,
-    AMySqlIdNotFoundError,
-)
+from src.clients.sqlite import SQLiteClient, SqliteIdNotFoundError
 from src.exceptions.http import WrongArgumentException
 from src.logger import get_logger
-from src.models.database import ConfigTable
+from src.models.database import Configs
 
 from .models import ConfigModel, FullDictationElement, SentencesElement, WaitElement
 
@@ -36,9 +32,9 @@ def sequence_to_str(
 
 
 async def load_configs() -> list[ConfigModel]:
-    mysql_reader = AMysqlClientReader(logger)
+    sqlite = SQLiteClient(logger)
 
-    configs_table = await mysql_reader.select(table=ConfigTable)
+    configs_table = sqlite.select(table=Configs)
     return [
         ConfigModel(id=c.id, name=c.name, sequence=str_to_sequence(c.sequence))
         for c in configs_table
@@ -46,33 +42,33 @@ async def load_configs() -> list[ConfigModel]:
 
 
 async def remove_config(config_id: str) -> None:
-    mysql_writer = AMysqlClientWriter(logger)
+    sqlite = SQLiteClient(logger)
     try:
-        await mysql_writer.delete_by_id(table=ConfigTable, id=config_id)
-    except AMySqlIdNotFoundError:
+        sqlite.delete_by_id(table=Configs, id=config_id)
+    except SqliteIdNotFoundError:
         raise WrongArgumentException(f"no config with {config_id=}")
     return
 
 
 async def add_or_update_config(config: ConfigModel) -> str:
-    mysql_writer = AMysqlClientWriter(logger)
+    sqlite = SQLiteClient(logger)
 
-    config_table = ConfigTable(
+    config_table = Configs(
         id=config.id,
         name=config.name,
         sequence=sequence_to_str(config.sequence),
     )
 
     try:
-        await mysql_writer.update_by_id(
-            table=ConfigTable,
+        sqlite.update_by_id(
+            table=Configs,
             id=config.id,
             update_col_value=dict(
                 name=config_table.name,
                 sequence=config_table.sequence,
             ),
         )
-    except AMySqlIdNotFoundError:
-        await mysql_writer.insert_one(table=ConfigTable, to_insert=config_table)
+    except SqliteIdNotFoundError:
+        sqlite.insert_one(table=Configs, to_insert=config_table)
 
     return config_table.id

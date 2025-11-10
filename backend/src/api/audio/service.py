@@ -1,16 +1,15 @@
-import aiofiles
 from src.clients.aws import S3Client
-from src.clients.mysql import AMysqlClientReader, AMySqlIdNotFoundError
+from src.clients.sqlite import SQLiteClient, SqliteIdNotFoundError
 from src.config.env_var import S3Buckets
 from src.config.runtime import USES_LOCAL_FILES, path_config
 from src.exceptions.http import WrongArgumentException
 from src.logger import get_logger
 from src.models.database import (
-    AudioTable,
-    StoryAudioTable,
-    StoryChunkAudioTable,
-    StoryChunkTable,
-    StoryTable,
+    Audios,
+    Stories,
+    StoryAudios,
+    StoryChunkAudios,
+    StoryChunks,
 )
 
 from .models import AudioMetadata
@@ -33,56 +32,55 @@ def get_audio_url(audio_url: str) -> str:
 
 
 async def load_metadata(story_id: str, speed: int) -> AudioMetadata:
-    mysql_reader = AMysqlClientReader(logger)
+    sqlite = SQLiteClient(logger)
 
     try:
-        story = await mysql_reader.select_by_id(table=StoryTable, id=story_id)
-    except AMySqlIdNotFoundError:
+        story = sqlite.select_by_id(table=Stories, id=story_id)
+    except SqliteIdNotFoundError:
         raise WrongArgumentException(f"no story found for {story_id=}")
 
-    story_audios = await mysql_reader.select(
-        table=StoryAudioTable, cond_equal=dict(storyId=story_id, speedPercentage=speed)
+    story_audios = sqlite.select(
+        table=StoryAudios, cond_equal=dict(story_id=story_id, speed_percentage=speed)
     )
     if not story_audios:
         raise WrongArgumentException(f"no audio for {story_id=}, {speed=}")
 
-    audio = await mysql_reader.select_by_id(
-        table=AudioTable, id=story_audios[0].audioId
-    )
+    audio = sqlite.select_by_id(table=Audios, id=story_audios[0].audio_id)
 
     return AudioMetadata(audio_text=story.text, audio_url=get_audio_url(audio.url))
 
 
 async def load_sentence_metadata(story_id: str, speed: int) -> list[AudioMetadata]:
-    mysql_reader = AMysqlClientReader(logger)
+    sqlite = SQLiteClient(logger)
 
-    if not await mysql_reader.id_exists(table=StoryTable, id=story_id):
+    if not sqlite.id_exists(table=Stories, id=story_id):
         raise WrongArgumentException(f"no story found for {story_id=}")
 
-    story_chunks = await mysql_reader.select(
-        table=StoryChunkTable,
+    story_chunks = sqlite.select(
+        table=StoryChunks,
         cond_equal=dict(
-            storyId=story_id,
+            story_id=story_id,
         ),
     )
     if not story_chunks:
         raise WrongArgumentException(f"no story chunks for {story_id=}")
     story_chunks.sort(key=lambda sc: sc.position)
 
-    story_chunks_audio = await mysql_reader.select(
-        table=StoryChunkAudioTable,
-        cond_equal=dict(speedPercentage=speed),
-        cond_in=dict(storyChunkId=[s.id for s in story_chunks]),
+    story_chunks_audio = sqlite.select(
+        table=StoryChunkAudios,
+        cond_equal=dict(speed_percentage=speed),
+        cond_in=dict(story_chunk_id=[s.id for s in story_chunks]),
     )
     if not story_chunks_audio:
         raise WrongArgumentException(f"no audio chunks for {story_id=}, {speed=}")
 
-    audios = await mysql_reader.select(
-        table=AudioTable, cond_in=dict(id=[sca.audioId for sca in story_chunks_audio])
+    audios = sqlite.select(
+        table=Audios, cond_in=dict(id=[sca.audio_id for sca in story_chunks_audio])
     )
     audio_id_to_url_map = {a.id: get_audio_url(a.url) for a in audios}
     chunk_id_to_audio_url_map = {
-        sca.storyChunkId: audio_id_to_url_map[sca.audioId] for sca in story_chunks_audio
+        sca.story_chunk_id: audio_id_to_url_map[sca.audio_id]
+        for sca in story_chunks_audio
     }
     if len(chunk_id_to_audio_url_map) != len(story_chunks):
         raise Exception(f"missing audio chunks compared to the story chunks")
@@ -98,7 +96,7 @@ async def load_sentence_metadata(story_id: str, speed: int) -> list[AudioMetadat
 
 async def load_audio_bytes(filename: str) -> bytes:
     ## NOTE: This is only used when USES_LOCAL_FILE==True, this is local workaround.
-    async with aiofiles.open(path_config.audio / filename, "rb") as f:
-        audio_bytes = await f.read()
+    with open(path_config.audio / filename, "rb") as f:
+        audio_bytes = f.read()
 
     return audio_bytes
