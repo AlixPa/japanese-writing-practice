@@ -44,6 +44,7 @@ clear-DANGER:
 	@echo "Press Ctrl+C to abort or wait 5s..."
 	@sleep 5
 	$(COMPOSE) -p japanese-writing-practice down -v --rmi all --remove-orphans
+	rm -rf backend/src/static/localdb.sqlite
 	@echo "All resources for japanese-writing-practice removed."
 
 new-migration:

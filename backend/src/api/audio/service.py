@@ -1,4 +1,3 @@
-import aiofiles
 from src.clients.aws import S3Client
 from src.clients.sqlite import SQLiteClient, SqliteIdNotFoundError
 from src.config.env_var import S3Buckets
@@ -97,7 +96,7 @@ async def load_sentence_metadata(story_id: str, speed: int) -> list[AudioMetadat
 
 async def load_audio_bytes(filename: str) -> bytes:
     ## NOTE: This is only used when USES_LOCAL_FILE==True, this is local workaround.
-    async with aiofiles.open(path_config.audio / filename, "rb") as f:
-        audio_bytes = await f.read()
+    with open(path_config.audio / filename, "rb") as f:
+        audio_bytes = f.read()
 
     return audio_bytes

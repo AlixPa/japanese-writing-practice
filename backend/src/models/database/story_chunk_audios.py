@@ -1,5 +1,5 @@
 from pydantic import Field
-from src.models.uuid4_validate import UUID4Str
+from src.models.uuid4str import UUID4Str
 
 from .base import BaseTableModel
 

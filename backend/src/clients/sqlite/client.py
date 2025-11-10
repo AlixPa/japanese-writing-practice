@@ -40,6 +40,7 @@ class SQLiteClient(ABC):
             path_config.sqlite_db, isolation_level=self._isolation_level  # type: ignore
         )
         self.connection.row_factory = sqlite3.Row
+        self.connection.execute("PRAGMA foreign_keys = ON;")
 
     def _logging(
         self, cursor: sqlite3.Cursor, query: str, params: tuple | None
