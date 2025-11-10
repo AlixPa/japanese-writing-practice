@@ -17,7 +17,7 @@ class PathConfig:
     audio: Path = _src_static / "audio_files"
     seed_db: Path = _src_static / "seed_db"
     local_data_scripts: Path = _src_static / "local_data"
-    sqlite_db: Path = _src_static / "japanese_dictation.sqlite"
+    sqlite_db: Path = _src_static / "localdb.sqlite"
 
     def __post_init__(self):
         self.audio.mkdir(parents=True, exist_ok=True)

@@ -2,7 +2,7 @@ import sqlite3
 import traceback
 from abc import ABC
 from logging import Logger
-from typing import Type, TypeVar, cast, overload
+from typing import Literal, Type, TypeVar, cast, overload
 
 from src.config.runtime import path_config
 from src.logger import get_logger
@@ -21,16 +21,24 @@ GenericTableModel = TypeVar("GenericTableModel", bound=BaseTableModel)
 
 
 class SQLiteClient(ABC):
-    def __init__(self, logger: Logger | None = None) -> None:
+    def __init__(
+        self,
+        logger: Logger | None = None,
+        isolation_level: Literal["DEFERRED"] | None = None,
+    ) -> None:
         self.logger = logger or get_logger("SQLiteClient-logger")
         self.connection: sqlite3.Connection | None = None
         self.cursor: sqlite3.Cursor | None = None
+        assert isolation_level in {"DEFERRED", None}
+        self._isolation_level = isolation_level
         self._connect()
 
     def _connect(self) -> None:
         if self.connection:
             self.connection.close()
-        self.connection = sqlite3.connect(path_config.sqlite_db)
+        self.connection = sqlite3.connect(
+            path_config.sqlite_db, isolation_level=self._isolation_level  # type: ignore
+        )
         self.connection.row_factory = sqlite3.Row
 
     def _logging(

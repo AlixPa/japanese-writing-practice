@@ -20,6 +20,7 @@ stop:
 
 init-app:
 	@if [ ! -f .env ]; then cp .env_example .env; fi
+	@if [ ! -f backend/src/static/localdb.sqlite ]; then cp backend/src/static/japanese_dictation.sqlite backend/src/static/localdb.sqlite; fi
 
 app: init-app run-frontend run-backend
 # app-advanced: app run-voicevox
