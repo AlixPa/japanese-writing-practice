@@ -3,5 +3,3 @@
 .env
 to_ignore/
 .venv
-
-backend/src/static/localdb.sqlite

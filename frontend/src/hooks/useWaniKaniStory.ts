@@ -13,9 +13,9 @@ export function useWaniKaniStory(level: number) {
       setLoading(true)
       setError(null)
       try {
-        const story = await api.getStory(level)
+        const stories = await api.getStory(level)
         if (cancelled) return
-        setData(story)
+        setData(stories.length > 0 ? stories[0] : null)
       } catch (e) {
         if (!cancelled) {
           setError('Failed to load story')
