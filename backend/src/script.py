@@ -1,5 +1,4 @@
-from .scripts.init_db import init_db_main
+from .scripts.manage_dbfile_s3 import load_sqlite_file
 
 if __name__ == "__main__":
-    init_db_main()
-    pass
+    load_sqlite_file()
