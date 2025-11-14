@@ -3,7 +3,7 @@ import os
 import time
 
 from src.clients.voicevox import VoiceVoxClient
-from src.config.runtime import path_config
+from src.config.path import path_config
 from src.logger import get_logger
 from tqdm import tqdm
 

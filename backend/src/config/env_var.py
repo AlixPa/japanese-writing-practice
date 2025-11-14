@@ -19,16 +19,5 @@ class VoiceVoxConfig:
     port: int = int(os.getenv("VOICEVOX_PORT", 8888))
 
 
-class S3Buckets:
-    japanese_dictation: str = "japanese-dictation"
-
-
-@dataclass(frozen=True)
-class AWSConfig:
-    access_key: str = os.getenv("AWS_ACCESS_KEY", "")
-    secret_access_key: str = os.getenv("AWS_SECRET_ACCESS_KEY", "")
-
-
 mysql_config = MysqlConfig()
 voicevox_config = VoiceVoxConfig()
-aws_config = AWSConfig()

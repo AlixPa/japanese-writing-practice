@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Literal
 
 import boto3
-from src.config.env_var import aws_config
+from src.config.aws import aws_config
 from src.logger import get_logger
 
 
@@ -42,7 +42,7 @@ class S3Client:
         dst_filename: str | None = None,
     ) -> None:
         """
-        Uploads a file to s3.
+        Download a file to s3.
         If no dst_filename is provided, dst_filename will be same as the one as s3_filename
         """
         self.client.download_file(

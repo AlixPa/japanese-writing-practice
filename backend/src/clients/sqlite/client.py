@@ -4,7 +4,7 @@ from abc import ABC
 from logging import Logger
 from typing import Literal, Type, TypeVar, cast, overload
 
-from src.config.runtime import path_config
+from src.config.path import path_config
 from src.logger import get_logger
 from src.models.database import BaseTableModel
 

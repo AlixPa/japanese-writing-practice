@@ -1,12 +1,10 @@
 import json
 import os
 
-from src.config.runtime import PathConfig
+from src.config.path import path_config
 
 
 def main() -> None:
-    path_config = PathConfig()
-
     to_rename = {
         "story_audios.json": {
             "audioId": "audio_id",

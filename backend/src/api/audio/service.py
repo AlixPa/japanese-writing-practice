@@ -1,7 +1,8 @@
 from src.clients.aws import S3Client
 from src.clients.sqlite import SQLiteClient, SqliteIdNotFoundError
-from src.config.env_var import S3Buckets
-from src.config.runtime import USES_LOCAL_FILES, path_config
+from src.config.aws import aws_config
+from src.config.runtime import USES_LOCAL_FILES
+from src.config.path import path_config
 from src.exceptions.http import WrongArgumentException
 from src.logger import get_logger
 from src.models.database import (
@@ -25,7 +26,9 @@ def get_audio_url(audio_url: str) -> str:
     s3 = S3Client()
     try:
         return s3.presigned_url(
-            bucket=S3Buckets.japanese_dictation, prefix="audio", filename=audio_url
+            bucket=aws_config.s3_buckets.japanese_dictation,
+            prefix="audio",
+            filename=audio_url,
         )
     finally:
         s3.close()

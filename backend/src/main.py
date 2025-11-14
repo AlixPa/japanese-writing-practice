@@ -1,12 +1,22 @@
 from asgi_correlation_id.middleware import CorrelationIdMiddleware, is_valid_uuid4
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
 # from fastapi.middleware.cors import CORSMiddleware
 from src.api import api_router
 from src.config.env_var import ENV
+from src.scripts.manage_dbfile_s3 import load_sqlite_file, save_sqlite_file
 from src.config.runtime import service_env
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    load_sqlite_file()
+    yield
+    save_sqlite_file()
+
+
+app = FastAPI(lifespan=lifespan)
 
 ## NOTE: setup if deployment
 # app.add_middleware(
