@@ -1,0 +1,21 @@
+name: Trigger Render Webhook
+
+on: workflow_dispatch
+
+jobs:
+  trigger_render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          curl -X POST "$RENDER_DEPLOY_HOOK" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "AWS_ACCESS_KEY": "'"$AWS_ACCESS_KEY"'",
+              "AWS_SECRET_ACCESS_KEY": "'"$AWS_SECRET_ACCESS_KEY"'"
+              ""
+            }'

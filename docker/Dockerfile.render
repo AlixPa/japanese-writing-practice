@@ -1,0 +1,21 @@
+FROM python:3.13.3
+
+# Set working directory
+WORKDIR /backend
+COPY ./backend /backend
+COPY ./frontend /frontend
+
+RUN apt-get update && apt-get install -y default-mysql-client
+
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Default command just sleeps (we override it in entrypoint)
+CMD [
+    "uvicorn",
+    "src.main:app",
+    "--host",
+    "0.0.0.0",
+    "--port",
+    "$PORT",
+]
