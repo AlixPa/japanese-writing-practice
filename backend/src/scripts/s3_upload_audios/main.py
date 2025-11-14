@@ -3,7 +3,7 @@ import os
 from src.clients.aws import S3Client
 from src.clients.mysql.sync_client import MysqlClientReader
 from src.config.env_var import S3Buckets
-from src.config.runtime import path_config
+from src.config.path import path_config
 from src.models.database import AudioTable
 from tqdm import tqdm
 
