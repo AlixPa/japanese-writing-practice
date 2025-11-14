@@ -49,7 +49,7 @@ clear-DANGER:
 	@echo "All resources for japanese-writing-practice removed."
 
 new-migration:
-	./scripts/new_migration.sh "$(NAME)"
+	./shell/new_migration.sh "$(NAME)"
 
 .PHONY: $(foreach s,$(SERVICES),run-$(s) rebuild-$(s) logs-$(s)) \
 	stop clean app frontend-dev backend-dev clear-DANGER \
