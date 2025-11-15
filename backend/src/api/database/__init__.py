@@ -1,3 +1,3 @@
-from .router import router as config_router
+from .router import router as database_router
 
-__all__ = ["config_router"]
+__all__ = ["database_router"]
