@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
-import { api, type ApiConfig } from '@/api/client'
+import { createApi, type ApiConfig } from '@/api/client'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function useConfigs() {
+  const { token } = useAuth()
   const [configs, setConfigs] = useState<ApiConfig[]>([])
   const [loading, setLoading] = useState(true) // Start with true
   const [error, setError] = useState<string | null>(null)
@@ -10,6 +12,8 @@ export function useConfigs() {
     setLoading(true)
     setError(null)
     try {
+      // Use authenticated API with token
+      const api = createApi(token)
       const res = await api.getConfigs()
       const sorted = [...res].sort((a, b) => a.name.localeCompare(b.name))
       setConfigs(sorted)
@@ -25,7 +29,7 @@ export function useConfigs() {
 
   useEffect(() => {
     reload.current()
-  }, [])
+  }, [token]) // Reload when token changes
 
   return { configs, loading, error, reload: reload.current, setConfigs }
 }

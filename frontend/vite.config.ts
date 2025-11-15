@@ -17,6 +17,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    // Expose GOOGLE_CLIENT_ID to client-side code
+    'import.meta.env.GOOGLE_CLIENT_ID': JSON.stringify(env.GOOGLE_CLIENT_ID),
+  },
   server: {
     port: Number(env.FRONTEND_PORT) || 5173,
     proxy: {

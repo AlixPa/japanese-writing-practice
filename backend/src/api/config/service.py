@@ -1,6 +1,7 @@
 import json
 
 from src.clients.sqlite import SQLiteClient, SqliteIdNotFoundError
+from src.config.env_var import DEFAULT_CONFIG_ID
 from src.exceptions.http import WrongArgumentException
 from src.logger import get_logger
 from src.models.database import Configs
@@ -31,10 +32,19 @@ def sequence_to_str(
     return json.dumps([s.model_dump() for s in sequence])
 
 
-async def load_configs() -> list[ConfigModel]:
+async def load_configs(user_id: str) -> list[ConfigModel]:
     sqlite = SQLiteClient(logger)
 
-    configs_table = sqlite.select(table=Configs)
+    configs_table = sqlite.select(table=Configs, cond_equal=dict(user_id=user_id))
+
+    # If no configs, copy default one for the user
+    if not configs_table:
+        default_config = sqlite.select_by_id(table=Configs, id=DEFAULT_CONFIG_ID)
+        new_config = Configs(
+            name=default_config.name, sequence=default_config.sequence, user_id=user_id
+        )
+        sqlite.insert_one(table=Configs, to_insert=default_config)
+        configs_table = [new_config]
     return [
         ConfigModel(id=c.id, name=c.name, sequence=str_to_sequence(c.sequence))
         for c in configs_table
@@ -50,13 +60,14 @@ async def remove_config(config_id: str) -> None:
     return
 
 
-async def add_or_update_config(config: ConfigModel) -> str:
+async def add_or_update_config(config: ConfigModel, user_id: str) -> str:
     sqlite = SQLiteClient(logger)
 
     config_table = Configs(
         id=config.id,
         name=config.name,
         sequence=sequence_to_str(config.sequence),
+        user_id=user_id,
     )
 
     try:

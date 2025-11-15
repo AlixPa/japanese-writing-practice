@@ -10,7 +10,7 @@ services:
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     volumes:
-      - ./backend/src/static/audio_files:/backend/src/static/audio_files
+      - ./backend/src/static:/backend/src/static
     develop:
       watch:
         - action: sync

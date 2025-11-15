@@ -1,7 +1,8 @@
-from src.logger import get_logger
-
-logger = get_logger()
+from src.clients.sqlite import SQLiteClient
+from src.models.database import Configs, Users
 
 
 def main() -> None:
-    logger.info("This is the sample script.")
+    sqlite = SQLiteClient()
+    print(sqlite.select(table=Users))
+    print(sqlite.select(table=Configs))
