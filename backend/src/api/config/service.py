@@ -1,7 +1,8 @@
 import json
 
 from src.clients.sqlite import SQLiteClient, SqliteIdNotFoundError
-from src.exceptions.http import WrongArgumentException
+from src.config.env_var import DEFAULT_CONFIG_ID, DEFAULT_USER_ID
+from src.exceptions.http import UnAuthorizedException, WrongArgumentException
 from src.logger import get_logger
 from src.models.database import Configs
 
@@ -31,13 +32,22 @@ def sequence_to_str(
     return json.dumps([s.model_dump() for s in sequence])
 
 
-async def load_configs() -> list[ConfigModel]:
+async def load_configs(user_id: str) -> list[ConfigModel]:
     sqlite = SQLiteClient(logger)
 
-    configs_table = sqlite.select(table=Configs)
+    configs = sqlite.select(table=Configs, cond_equal=dict(user_id=user_id))
+
+    # If no configs, copy default one for the user
+    if not configs:
+        default_config = sqlite.select_by_id(table=Configs, id=DEFAULT_CONFIG_ID)
+        new_config = Configs(
+            name=default_config.name, sequence=default_config.sequence, user_id=user_id
+        )
+        sqlite.insert_one(table=Configs, to_insert=new_config)
+        configs = [new_config]
     return [
         ConfigModel(id=c.id, name=c.name, sequence=str_to_sequence(c.sequence))
-        for c in configs_table
+        for c in configs
     ]
 
 
@@ -50,13 +60,19 @@ async def remove_config(config_id: str) -> None:
     return
 
 
-async def add_or_update_config(config: ConfigModel) -> str:
+async def add_or_update_config(config: ConfigModel, user_id: str) -> str:
+    if user_id == DEFAULT_USER_ID:
+        raise UnAuthorizedException(
+            "Cannot add or modify a configuration if user is not connected."
+        )
+
     sqlite = SQLiteClient(logger)
 
     config_table = Configs(
         id=config.id,
         name=config.name,
         sequence=sequence_to_str(config.sequence),
+        user_id=user_id,
     )
 
     try:

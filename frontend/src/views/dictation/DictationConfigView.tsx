@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ConfigEditor } from './config/ConfigEditor'
 import type { DictationBlock } from './config/types'
-import { api, type ApiConfig } from '@/api/client'
+import { createApi, type ApiConfig } from '@/api/client'
 import { ConfigSelector } from './components/ConfigSelector'
 import { useConfigs } from '@/hooks/useConfigs'
+import { useAuth } from '@/contexts/AuthContext'
 
 
 function toBlocks(api: ApiConfig['sequence']): DictationBlock[] {
@@ -46,6 +47,7 @@ function toApiSequence(blocks: DictationBlock[]): ApiConfig['sequence'] {
 }
 
 export function DictationConfigView() {
+  const { token } = useAuth()
   const { configs, loading: configsLoading, reload, setConfigs } = useConfigs()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [nameDraft, setNameDraft] = useState<string>('')
@@ -53,6 +55,9 @@ export function DictationConfigView() {
   const [toast, setToast] = useState<{ message: string; kind: 'success' | 'error' } | null>(null)
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false)
   const selectedConfig = useMemo(() => configs.find(c => c.id === selectedId) || null, [configs, selectedId])
+  
+  // Create authenticated API instance
+  const api = createApi(token)
 
   const loadConfigs = React.useCallback(async (): Promise<ApiConfig[]> => {
     return await reload()
@@ -97,9 +102,24 @@ export function DictationConfigView() {
     }
     try {
       await api.saveConfig(payload as any)
-    } catch {
-      setToast({ message: 'Save failed', kind: 'error' })
-      setTimeout(() => setToast(null), 2000)
+    } catch (error: any) {
+      // Check if it's a 401 Unauthorized error
+      // ApiError has status and detail properties
+      const status = error?.status
+      const isUnauthorized = status === 401
+      
+      if (isUnauthorized) {
+        const backendMessage = error?.detail
+        const message = backendMessage 
+          ? `${backendMessage} Please sign in with Google to save your own configurations.`
+          : 'Please sign in with Google to save your own configurations.'
+        setToast({ message, kind: 'error' })
+      } else {
+        // For debugging - log the error to see its structure
+        console.error('Save error:', error)
+        setToast({ message: 'Save failed. Please try again.', kind: 'error' })
+      }
+      setTimeout(() => setToast(null), 4000)
       return
     }
     const refreshed = await loadConfigs()
@@ -118,9 +138,24 @@ export function DictationConfigView() {
     if (!selectedId) return
     try {
       await api.deleteConfig(selectedId)
-    } catch {
-      setToast({ message: 'Delete failed', kind: 'error' })
-      setTimeout(() => setToast(null), 2000)
+    } catch (error: any) {
+      // Check if it's a 401 Unauthorized error
+      // ApiError has status and detail properties
+      const status = error?.status
+      const isUnauthorized = status === 401
+      
+      if (isUnauthorized) {
+        const backendMessage = error?.detail
+        const message = backendMessage
+          ? `${backendMessage} Please sign in with Google to delete your configurations.`
+          : 'Please sign in with Google to delete your configurations.'
+        setToast({ message, kind: 'error' })
+      } else {
+        // For debugging - log the error to see its structure
+        console.error('Delete error:', error)
+        setToast({ message: 'Delete failed. Please try again.', kind: 'error' })
+      }
+      setTimeout(() => setToast(null), 4000)
       return
     }
     const refreshed = await loadConfigs()

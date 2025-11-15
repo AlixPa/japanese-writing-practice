@@ -6,3 +6,4 @@ class Configs(BaseTableModel):
 
     name: str
     sequence: str
+    user_id: str

@@ -598,7 +598,7 @@ class SQLiteClient(ABC):
         else:
             table_name = table.__tablename__
 
-        query_parts = [f"INSERT {"IGNORE" if or_ignore else ""} INTO {table_name}"]
+        query_parts = [f"INSERT {"OR IGNORE" if or_ignore else ""} INTO {table_name}"]
         query_parts.append(f"({",".join(cols)})")
         query_parts.append("VALUES")
 

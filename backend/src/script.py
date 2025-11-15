@@ -1,4 +1,4 @@
-from .scripts.manage_dbfile_s3 import load_sqlite_file
+from .scripts.sample import main
 
 if __name__ == "__main__":
-    load_sqlite_file()
+    main()
