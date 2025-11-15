@@ -17,8 +17,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_GITHUB }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_GITHUB }}
           aws-region: ap-northeast-1
 
       - name: Login to ECR
@@ -51,8 +51,8 @@ jobs:
             docker rm jwp-deployement || true
             docker run -d --name jwp-deployement \
               --network jwp_network \
-              -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
-              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+              -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_APP }} \
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_APP }} \
               -e USES_LOCAL_FILES=False \
               -e SYNC_DB_S3=True \
               ${{ steps.ecr.outputs.registry }}/alixparadis/japanese-writing-practice/jwp-app:latest
