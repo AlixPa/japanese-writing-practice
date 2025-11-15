@@ -2,7 +2,7 @@ import sqlite3
 import traceback
 from abc import ABC
 from logging import Logger
-from typing import Literal, Type, TypeVar, cast, overload
+from typing import Any, Literal, Type, TypeVar
 
 from src.config.path import path_config
 from src.logger import get_logger
@@ -112,7 +112,7 @@ class SQLiteClient(ABC):
 
         return " ".join(conds), tuple(args)
 
-    def execute(self, query: str, args: tuple | None = None) -> list[dict[str, object]]:
+    def execute(self, query: str, args: tuple | None = None) -> list[dict[str, Any]]:
         """
         Execute a SQL query and return the results.
 
@@ -144,23 +144,6 @@ class SQLiteClient(ABC):
         self.cursor = None
         return res
 
-    @overload
-    def count(
-        self,
-        table: str,
-        select_col: list[str] = list(),
-        cond_null: list[str] = list(),
-        cond_not_null: list[str] = list(),
-        cond_in: dict[str, list] = dict(),
-        cond_equal: dict[str, object] = dict(),
-        cond_non_equal: dict[str, object] = dict(),
-        cond_less_or_eq: dict[str, object] = dict(),
-        cond_greater_or_eq: dict[str, object] = dict(),
-        cond_less: dict[str, object] = dict(),
-        cond_greater: dict[str, object] = dict(),
-    ) -> int: ...
-
-    @overload
     def count(
         self,
         table: Type[GenericTableModel],
@@ -174,22 +157,7 @@ class SQLiteClient(ABC):
         cond_greater_or_eq: dict[str, object] = dict(),
         cond_less: dict[str, object] = dict(),
         cond_greater: dict[str, object] = dict(),
-    ) -> int: ...
-
-    def count(
-        self,
-        table: str | Type[GenericTableModel],
-        select_col: list[str] = list(),
-        cond_null: list[str] = list(),
-        cond_not_null: list[str] = list(),
-        cond_in: dict[str, list] = dict(),
-        cond_equal: dict[str, object] = dict(),
-        cond_non_equal: dict[str, object] = dict(),
-        cond_less_or_eq: dict[str, object] = dict(),
-        cond_greater_or_eq: dict[str, object] = dict(),
-        cond_less: dict[str, object] = dict(),
-        cond_greater: dict[str, object] = dict(),
-    ) -> int | None:
+    ) -> int:
         """
         Execute a SELECT COUNT(...) query with various conditions.
 
@@ -225,9 +193,8 @@ class SQLiteClient(ABC):
         None
             if query went wrong
         """
-        table_name = table if isinstance(table, str) else table.__tablename__
         query_parts = [
-            f"SELECT COUNT({', '.join(select_col) if select_col else '*'}) AS ct FROM {table_name}"
+            f"SELECT COUNT({', '.join(select_col) if select_col else '*'}) AS ct FROM {table.__tablename__}"
         ]
         cond, args = self._generate_cond(
             cond_equal=cond_equal,
@@ -245,32 +212,9 @@ class SQLiteClient(ABC):
         query_parts.append(";")
 
         res_Sql = self.execute(query=" ".join(query_parts), args=args)
-        if not res_Sql:
-            return None
         res = res_Sql[0]["ct"]
         return int(str(res))
 
-    @overload
-    def select(
-        self,
-        table: str,
-        cond_null: list[str] = list(),
-        cond_not_null: list[str] = list(),
-        cond_in: dict[str, list] = dict(),
-        cond_equal: dict[str, object] = dict(),
-        cond_non_equal: dict[str, object] = dict(),
-        cond_less_or_eq: dict[str, object] = dict(),
-        cond_greater_or_eq: dict[str, object] = dict(),
-        cond_less: dict[str, object] = dict(),
-        cond_greater: dict[str, object] = dict(),
-        order_by: str = "",
-        ascending_order: bool = True,
-        limit: int = 0,
-        offset: int = 0,
-        select_col: list[str] = list(),
-    ) -> list[dict[str, object]]: ...
-
-    @overload
     def select(
         self,
         table: Type[GenericTableModel],
@@ -287,26 +231,7 @@ class SQLiteClient(ABC):
         ascending_order: bool = True,
         limit: int = 0,
         offset: int = 0,
-    ) -> list[GenericTableModel]: ...
-
-    def select(
-        self,
-        table: str | Type[GenericTableModel],
-        cond_null: list[str] = list(),
-        cond_not_null: list[str] = list(),
-        cond_in: dict[str, list] = dict(),
-        cond_equal: dict[str, object] = dict(),
-        cond_non_equal: dict[str, object] = dict(),
-        cond_less_or_eq: dict[str, object] = dict(),
-        cond_greater_or_eq: dict[str, object] = dict(),
-        cond_less: dict[str, object] = dict(),
-        cond_greater: dict[str, object] = dict(),
-        order_by: str = "",
-        ascending_order: bool = True,
-        limit: int = 0,
-        offset: int = 0,
-        select_col: list[str] = list(),
-    ) -> list[dict[str, object]] | list[GenericTableModel]:
+    ) -> list[GenericTableModel]:
         """
         Execute a SELECT query with various conditions.
 
@@ -314,8 +239,6 @@ class SQLiteClient(ABC):
         ----------
         table : str | Type[T]
             Table name or actual table class to query from
-        select_col : list[str], optional
-            List of columns to select, by default all columns. Note that this should not be used with a SqlModel expected return.
         cond_null : list[str], optional
             Columns that must be NULL
         cond_not_null : list[str], optional
@@ -344,12 +267,7 @@ class SQLiteClient(ABC):
         tuple
             Query results as a tuple of dictionaries or actual class if given
         """
-        if isinstance(table, str):
-            query_parts = [
-                f"SELECT {', '.join(select_col) if select_col else '*'} FROM {table}"
-            ]
-        else:
-            query_parts = [f"SELECT * FROM {table.__tablename__}"]
+        query_parts = [f"SELECT * FROM {table.__tablename__}"]
         cond, args = self._generate_cond(
             cond_equal=cond_equal,
             cond_greater=cond_greater,
@@ -371,32 +289,13 @@ class SQLiteClient(ABC):
             query_parts.append(f"OFFSET {offset}")
         query_parts.append(";")
         res_Sql = self.execute(query=" ".join(query_parts), args=args)
-        if isinstance(table, str):
-            return res_Sql
-        else:
-            return list(table(**r) for r in res_Sql)  # type: ignore
+        return list(table(**r) for r in res_Sql)
 
-    @overload
-    def select_by_id(
-        self,
-        table: str,
-        id: str,
-        select_col: list[str] = list(),
-    ) -> dict[str, object]: ...
-
-    @overload
     def select_by_id(
         self,
         table: Type[GenericTableModel],
         id: str,
-    ) -> GenericTableModel: ...
-
-    def select_by_id(
-        self,
-        table: str | Type[GenericTableModel],
-        id: str,
-        select_col: list[str] = list(),
-    ) -> dict[str, object] | GenericTableModel:
+    ) -> GenericTableModel:
         """
         Select a row from a database table by its ID.
 
@@ -406,48 +305,25 @@ class SQLiteClient(ABC):
             Table name or actual table class to query from
         id : str
             ID of the row to select
-        select_col : list[str], optional
-            List of columns to select, by default all columns. Note that this should not be used with a SqlModel expected return.
 
         Returns
         -------
         dict[str, object] | T
             Selected row as a dictionnary or actual class if given
         """
-        if isinstance(table, str):
-            res_Sql = self.select(
-                table=table,
-                select_col=select_col,
-                cond_equal={"id": id},
-            )
-        else:
-            res_Sql = self.select(
-                table=table,
-                cond_equal={"id": id},
-            )
+        res_Sql = self.select(
+            table=table,
+            cond_equal={"id": id},
+        )
         if not res_Sql:
             raise SqliteIdNotFoundError(
-                f"{id=} not found during select in table {table if isinstance(table, str) else table.__tablename__}"
+                f"{id=} not found during select in table {table.__tablename__}"
             )
         return res_Sql[0]
 
-    @overload
-    def id_exists(
-        self,
-        table: str,
-        id: str,
-    ) -> bool: ...
-
-    @overload
     def id_exists(
         self,
         table: Type[GenericTableModel],
-        id: str,
-    ) -> bool: ...
-
-    def id_exists(
-        self,
-        table: str | Type[GenericTableModel],
         id: str,
     ) -> bool:
         try:
@@ -479,26 +355,10 @@ class SQLiteClient(ABC):
         self.connection.close()
         self._connect()
 
-    @overload
-    def insert_one(
-        self,
-        table: str,
-        to_insert: dict[str, object],
-        or_ignore=False,
-    ) -> None: ...
-
-    @overload
     def insert_one(
         self,
         table: Type[GenericTableModel],
         to_insert: GenericTableModel,
-        or_ignore=False,
-    ) -> None: ...
-
-    def insert_one(
-        self,
-        table: str | Type[GenericTableModel],
-        to_insert: dict[str, object] | GenericTableModel,
         or_ignore=False,
     ) -> None:
         """
@@ -506,49 +366,23 @@ class SQLiteClient(ABC):
 
         Parameters
         ----------
-        table_name : str
-            Name of the table to insert into
+        table: GenericTableModel
+            Table to insert into
         to_insert : dict
             Dictionary of column names and their corresponding values
         or_ignore : bool, optional
             If True, use INSERT IGNORE, default False
         """
-        # For typing
-        if isinstance(table, str):
-            to_insert = cast(dict[str, object], to_insert)
-            self.insert(
-                table=table,
-                to_insert=[to_insert],
-                or_ignore=or_ignore,
-            )
-        else:
-            to_insert = cast(GenericTableModel, to_insert)
-            self.insert(
-                table=table,
-                to_insert=[to_insert],
-                or_ignore=or_ignore,
-            )
+        self.insert(
+            table=table,
+            to_insert=[to_insert],
+            or_ignore=or_ignore,
+        )
 
-    @overload
-    def insert(
-        self,
-        table: str,
-        to_insert: list[dict[str, object]],
-        or_ignore=False,
-    ) -> None: ...
-
-    @overload
     def insert(
         self,
         table: Type[GenericTableModel],
         to_insert: list[GenericTableModel],
-        or_ignore=False,
-    ) -> None: ...
-
-    def insert(
-        self,
-        table: str | Type[GenericTableModel],
-        to_insert: list[dict[str, object]] | list[GenericTableModel],
         or_ignore=False,
     ) -> None:
         """
@@ -556,18 +390,14 @@ class SQLiteClient(ABC):
 
         Parameters
         ----------
-        table_name : str
-            Name of the table to insert into
+        table: GenericTableModel
+            Table to insert into
         to_insert : list[dict[str, object]]
             List of dictionary of column names and their corresponding values
         or_ignore : bool, optional
             If True, use INSERT IGNORE, default False
         """
-        if isinstance(table, str):
-            to_insert_dict = cast(list[dict[str, object]], to_insert)
-        else:
-            to_insert = cast(list[GenericTableModel], to_insert)
-            to_insert_dict = [e.model_dump() for e in to_insert]
+        to_insert_dict = [e.model_dump() for e in to_insert]
 
         for row in to_insert_dict:
             if "createdAt" in row:
@@ -593,12 +423,9 @@ class SQLiteClient(ABC):
                     )
         cols = list(cols)
 
-        if isinstance(table, str):
-            table_name = table
-        else:
-            table_name = table.__tablename__
-
-        query_parts = [f"INSERT {"OR IGNORE" if or_ignore else ""} INTO {table_name}"]
+        query_parts = [
+            f"INSERT {"OR IGNORE" if or_ignore else ""} INTO {table.__tablename__}"
+        ]
         query_parts.append(f"({",".join(cols)})")
         query_parts.append("VALUES")
 
@@ -616,164 +443,9 @@ class SQLiteClient(ABC):
             args=tuple(args),
         )
 
-    @overload
-    def update(
-        self,
-        table: str,
-        update_col_col: dict[str, str] = dict(),
-        update_col_value: dict[str, object] = dict(),
-        cond_null: list[str] = list(),
-        cond_not_null: list[str] = list(),
-        cond_in: dict[str, list] = dict(),
-        cond_equal: dict[str, object] = dict(),
-        cond_non_equal: dict[str, object] = dict(),
-        cond_less_or_eq: dict[str, object] = dict(),
-        cond_greater_or_eq: dict[str, object] = dict(),
-        cond_less: dict[str, object] = dict(),
-        cond_greater: dict[str, object] = dict(),
-    ) -> None: ...
-
-    @overload
-    def update(
-        self,
-        table: Type[GenericTableModel],
-        update_col_col: dict[str, str] = dict(),
-        update_col_value: dict[str, object] = dict(),
-        cond_null: list[str] = list(),
-        cond_not_null: list[str] = list(),
-        cond_in: dict[str, list] = dict(),
-        cond_equal: dict[str, object] = dict(),
-        cond_non_equal: dict[str, object] = dict(),
-        cond_less_or_eq: dict[str, object] = dict(),
-        cond_greater_or_eq: dict[str, object] = dict(),
-        cond_less: dict[str, object] = dict(),
-        cond_greater: dict[str, object] = dict(),
-    ) -> None: ...
-
-    def update(
-        self,
-        table: str | Type[GenericTableModel],
-        update_col_col: dict[str, str] = dict(),
-        update_col_value: dict[str, object] = dict(),
-        cond_null: list[str] = list(),
-        cond_not_null: list[str] = list(),
-        cond_in: dict[str, list] = dict(),
-        cond_equal: dict[str, object] = dict(),
-        cond_non_equal: dict[str, object] = dict(),
-        cond_less_or_eq: dict[str, object] = dict(),
-        cond_greater_or_eq: dict[str, object] = dict(),
-        cond_less: dict[str, object] = dict(),
-        cond_greater: dict[str, object] = dict(),
-    ) -> None:
-        """
-        Update rows in a database table based on conditions.
-
-        Parameters
-        ----------
-        table_name : str
-            Name of the table to update
-        update_col_col : dict[str, str], optional
-            Dictionary mapping columns to update with other column values
-        update_col_value : dict[str, object], optional
-            Dictionary mapping columns to update with specific values
-        cond_null : list[str], optional
-            Columns that must be NULL
-        cond_not_null : list[str], optional
-            Columns that must not be NULL
-        cond_in : dict[str, list], optional
-            Column values that must be in given list
-        cond_eq : dict[str, object], optional
-            Column values that must equal given value
-        cond_neq : dict[str, object], optional
-            Column values that must not equal given value
-        cond_leq : dict[str, object], optional
-            Column values that must be less than or equal to given value
-        cond_geq : dict[str, object], optional
-            Column values that must be greater than or equal to given value
-        cond_l : dict[str, object], optional
-            Column values that must be less than given value
-        cond_g : dict[str, object], optional
-            Column values that must be greater than given value
-        """
-        table_name = table if isinstance(table, str) else table.__tablename__
-
-        if "updatedAt" in update_col_col:
-            del update_col_col["updatedAt"]
-        if "updatedAt" in update_col_value:
-            del update_col_value["updatedAt"]
-        if "createdAt" in update_col_col:
-            del update_col_col["createdAt"]
-        if "createdAt" in update_col_value:
-            del update_col_value["createdAt"]
-
-        if not update_col_col and not update_col_value:
-            raise SqliteNoUpdateValuesError()
-
-        for col in update_col_col:
-            if col in update_col_value:
-                raise (SqliteDuplicateColumnUpdateError(column=col))
-        for col in update_col_value:
-            if col in update_col_col:
-                raise (SqliteDuplicateColumnUpdateError(column=col))
-
-        ids_to_update = self.select(
-            table=table_name,
-            select_col=["id"],
-            cond_equal=cond_equal,
-            cond_greater=cond_greater,
-            cond_greater_or_eq=cond_greater_or_eq,
-            cond_in=cond_in,
-            cond_less=cond_less,
-            cond_less_or_eq=cond_less_or_eq,
-            cond_non_equal=cond_non_equal,
-            cond_not_null=cond_not_null,
-            cond_null=cond_null,
-        )
-        ids_to_update_ls = [str(dt["id"]) for dt in ids_to_update]
-
-        if not ids_to_update:
-            self.logger.info("nothing to update")
-            return
-
-        args = list()
-        query_parts = [f"UPDATE {table_name} SET"]
-
-        query_set_part = list()
-        for col_prev, col_new in update_col_col.items():
-            query_set_part.append(f"{col_prev} = {col_new}")
-        for col, value in update_col_value.items():
-            query_set_part.append(f"{col} = ?")
-            args.append(value)
-        query_parts.append(", ".join(query_set_part))
-
-        query_parts.append(f"WHERE id IN ({','.join(['?']*len(ids_to_update_ls))})")
-        args.extend(ids_to_update_ls)
-
-        query_parts.append(";")
-
-        self.execute(query=" ".join(query_parts), args=tuple(args))
-
-    @overload
-    def update_by_id(
-        self,
-        table: str,
-        id: str,
-        update_col_col: dict[str, str] = dict(),
-        update_col_value: dict[str, object] = dict(),
-    ) -> None: ...
-
-    @overload
     def update_by_id(
         self,
         table: Type[GenericTableModel],
-        id: str,
-        update_col_col: dict[str, str] = dict(),
-        update_col_value: dict[str, object] = dict(),
-    ) -> None: ...
-
-    def update_by_id(
-        self,
-        table: str | Type[GenericTableModel],
         id: str,
         update_col_col: dict[str, str] = dict(),
         update_col_value: dict[str, object] = dict(),
@@ -783,8 +455,8 @@ class SQLiteClient(ABC):
 
         Parameters
         ----------
-        table_name : str
-            Name of the table to update
+        table: GenericTableModel
+            Table to update
         id : str
             ID of the row to update
         update_col_col : dict[str, str], optional
@@ -796,29 +468,41 @@ class SQLiteClient(ABC):
             raise SqliteIdNotFoundError(
                 f"{id=} not found during update in table {table if isinstance(table, str) else table.__tablename__}"
             )
-        self.update(
-            table=table,
-            update_col_col=update_col_col,
-            update_col_value=update_col_value,
-            cond_equal={"id": id},
-        )
+        for col in update_col_value:
+            if col in update_col_col:
+                raise SqliteDuplicateColumnUpdateError(
+                    f"Duplicates column in update statement. {col=} is in both update_col_value and update_col_col."
+                )
+        for col in update_col_col:
+            if col in update_col_value:
+                raise SqliteDuplicateColumnUpdateError(
+                    f"Duplicates column in update statement. {col=} is in both update_col_value and update_col_col."
+                )
 
-    @overload
-    def delete(
-        self,
-        table: str,
-        cond_null: list[str] = list(),
-        cond_not_null: list[str] = list(),
-        cond_in: dict[str, list] = dict(),
-        cond_equal: dict[str, object] = dict(),
-        cond_non_equal: dict[str, object] = dict(),
-        cond_less_or_eq: dict[str, object] = dict(),
-        cond_greater_or_eq: dict[str, object] = dict(),
-        cond_less: dict[str, object] = dict(),
-        cond_greater: dict[str, object] = dict(),
-    ) -> list[dict[str, object]]: ...
+        if not update_col_col and not update_col_value:
+            raise SqliteNoUpdateValuesError()
 
-    @overload
+        query_parts = [f"UPDATE {table.__tablename__}"]
+        query_parts.append("SET")
+
+        col_col_parts: list[str] = list()
+        for col_dst, col_src in update_col_col.items():
+            col_col_parts.append(f"{col_dst}={col_src}")
+        query_parts.append(",".join(col_col_parts))
+
+        col_val_parts: list[str] = list()
+        values = list()
+        for col_dst, value in update_col_value.items():
+            col_val_parts.append(f"{col_dst}=?")
+            values.append(value)
+        query_parts.append(",".join(col_val_parts))
+
+        query_parts.append(f"WHERE id=?")
+        values.append(id)
+        query_parts.append(";")
+
+        self.execute(query=" ".join(query_parts), args=tuple(values))
+
     def delete(
         self,
         table: Type[GenericTableModel],
@@ -831,21 +515,7 @@ class SQLiteClient(ABC):
         cond_greater_or_eq: dict[str, object] = dict(),
         cond_less: dict[str, object] = dict(),
         cond_greater: dict[str, object] = dict(),
-    ) -> list[GenericTableModel]: ...
-
-    def delete(
-        self,
-        table: str | Type[GenericTableModel],
-        cond_null: list[str] = list(),
-        cond_not_null: list[str] = list(),
-        cond_in: dict[str, list] = dict(),
-        cond_equal: dict[str, object] = dict(),
-        cond_non_equal: dict[str, object] = dict(),
-        cond_less_or_eq: dict[str, object] = dict(),
-        cond_greater_or_eq: dict[str, object] = dict(),
-        cond_less: dict[str, object] = dict(),
-        cond_greater: dict[str, object] = dict(),
-    ) -> list[dict[str, object]] | list[GenericTableModel]:
+    ) -> list[GenericTableModel]:
         """
         Delete rows from a database table based on conditions and returns them.
 
@@ -889,37 +559,22 @@ class SQLiteClient(ABC):
             cond_not_null=cond_not_null,
             cond_null=cond_null,
         )
-        if isinstance(table, str):
-            ids_to_delete_ls: list[str] = [str(dt["id"]) for dt in res_Sql]  # type: ignore
-        else:
-            ids_to_delete_ls: list[str] = [r.id for r in res_Sql]  # type: ignore
+        ids_to_delete_ls: list[str] = [r.id for r in res_Sql]
 
         if not ids_to_delete_ls:
             self.logger.info("nothing to update")
             return list()
 
-        if isinstance(table, str):
-            query_parts = [f"DELETE FROM {table}"]
-        else:
-            query_parts = [f"DELETE FROM {table.__tablename__}"]
-
+        query_parts = [f"DELETE FROM {table.__tablename__}"]
         query_parts.append(f"WHERE id IN ({", ".join(["?"]*len(ids_to_delete_ls))})")
         query_parts.append(";")
 
         self.execute(query=" ".join(query_parts), args=tuple(ids_to_delete_ls))
         return res_Sql
 
-    @overload
-    def delete_by_id(self, table: str, id: str) -> dict[str, object]: ...
-
-    @overload
     def delete_by_id(
         self, table: Type[GenericTableModel], id: str
-    ) -> GenericTableModel: ...
-
-    def delete_by_id(
-        self, table: str | Type[GenericTableModel], id: str
-    ) -> dict[str, object] | GenericTableModel:
+    ) -> GenericTableModel:
         """
         Delete a row from a database table by its ID.
 
@@ -939,6 +594,6 @@ class SQLiteClient(ABC):
 
         if not res_Sql:
             raise SqliteIdNotFoundError(
-                f"{id=} not found during delete in table {table if isinstance(table, str) else table.__tablename__}"
+                f"{id=} not found during delete in table {table.__tablename__}"
             )
         return res_Sql[0]
