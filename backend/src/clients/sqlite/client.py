@@ -37,7 +37,7 @@ class SQLiteClient(ABC):
         if self.connection:
             self.connection.close()
         self.connection = sqlite3.connect(
-            path_config.sqlite_db, isolation_level=self._isolation_level  # type: ignore
+            path_config.sqlite_db_file, isolation_level=self._isolation_level  # type: ignore
         )
         self.connection.row_factory = sqlite3.Row
         self.connection.execute("PRAGMA foreign_keys = ON;")
