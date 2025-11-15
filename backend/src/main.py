@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 
 from asgi_correlation_id.middleware import CorrelationIdMiddleware, is_valid_uuid4
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -24,16 +24,25 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.include_router(api_router)
+
 # Serving front from back for reduced render's costs
 app.mount(
     "/assets", StaticFiles(directory=path_config.front_dist / "assets"), name="assets"
 )
 
 
-@app.get("/")
-async def serve_frontend():
+@app.get("/{full_path:path}")
+async def serve_frontend(request: Request, full_path: str):
     return FileResponse(path_config.front_dist / "index.html")
 
+
+app.add_middleware(
+    CorrelationIdMiddleware,
+    header_name="X-Correlation-ID",
+    update_request_header=True,
+    validator=None if ENV == service_env.local else is_valid_uuid4,
+)
 
 ## NOTE: setup if deployment
 # app.add_middleware(
@@ -43,12 +52,3 @@ async def serve_frontend():
 #     allow_methods=["*"],
 #     allow_headers=["*"],
 # )
-
-app.include_router(api_router)
-
-app.add_middleware(
-    CorrelationIdMiddleware,
-    header_name="X-Correlation-ID",
-    update_request_header=True,
-    validator=None if ENV == service_env.local else is_valid_uuid4,
-)
