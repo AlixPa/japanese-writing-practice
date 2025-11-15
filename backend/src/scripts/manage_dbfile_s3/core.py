@@ -8,11 +8,11 @@ from src.config.path import path_config
 def load_sqlite_file() -> None:
     s3 = S3Client()
     s3.download_file(
-        dst_folder=path_config.sqlite_db.parents[0],
+        dst_folder=path_config.sqlite_db_file.parents[0],
         bucket=aws_config.s3_buckets.japanese_dictation,
         s3_filename="japanese_dictation.sqlite",
         key_prefix="database",
-        dst_filename=path_config.sqlite_db.name,
+        dst_filename=path_config.sqlite_db_file.name,
     )
     s3.close()
 
@@ -20,7 +20,7 @@ def load_sqlite_file() -> None:
 def save_sqlite_file() -> None:
     s3 = S3Client()
     s3.upload_file(
-        src_filepath=path_config.sqlite_db,
+        src_filepath=path_config.sqlite_db_file,
         bucket=aws_config.s3_buckets.japanese_dictation,
         key_prefix="database/saves",
         dst_filename=f"japanese_dictation_{int(time.time()*1000)}.sqlite",
