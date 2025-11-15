@@ -8,10 +8,11 @@ class PathConfig:
     audio: Path = _src_static / "audio_files"
     seed_db: Path = _src_static / "seed_db"
     local_data_scripts: Path = _src_static / "local_data"
-    sqlite_db: Path = _src_static / "localdb.sqlite"
     front_dist: Path = _src_static.parents[2] / "frontend" / "dist"
+    sqlite_db_file: Path = _src_static / "localdb.sqlite"
 
     def __post_init__(self):
+        self._src_static.mkdir(parents=True, exist_ok=True)
         self.audio.mkdir(parents=True, exist_ok=True)
         self.seed_db.mkdir(parents=True, exist_ok=True)
         self.local_data_scripts.mkdir(parents=True, exist_ok=True)
