@@ -1,6 +1,8 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export function WelcomeView() {
+  const navigate = useNavigate()
   return (
     <div style={{ 
       padding: 24, 
@@ -36,13 +38,28 @@ export function WelcomeView() {
         gap: 20 
       }}>
         {/* Dictation Card */}
-        <div style={{
-          border: '1px solid #e5e7eb',
-          borderRadius: 12,
-          padding: 20,
-          background: 'white',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-        }}>
+        <div 
+          onClick={() => navigate('/dictation')}
+          style={{
+            border: '1px solid #e5e7eb',
+            borderRadius: 12,
+            padding: 20,
+            background: 'white',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = '#3b82f6'
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'
+            e.currentTarget.style.transform = 'translateY(-2px)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = '#e5e7eb'
+            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)'
+            e.currentTarget.style.transform = 'translateY(0)'
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <div style={{
               width: 40,
@@ -72,13 +89,28 @@ export function WelcomeView() {
         </div>
 
         {/* Configuration Card */}
-        <div style={{
-          border: '1px solid #e5e7eb',
-          borderRadius: 12,
-          padding: 20,
-          background: 'white',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-        }}>
+        <div 
+          onClick={() => navigate('/configuration')}
+          style={{
+            border: '1px solid #e5e7eb',
+            borderRadius: 12,
+            padding: 20,
+            background: 'white',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = '#3b82f6'
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'
+            e.currentTarget.style.transform = 'translateY(-2px)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = '#e5e7eb'
+            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)'
+            e.currentTarget.style.transform = 'translateY(0)'
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <div style={{
               width: 40,
@@ -108,13 +140,28 @@ export function WelcomeView() {
         </div>
 
         {/* Generation Card */}
-        <div style={{
-          border: '1px solid #e5e7eb',
-          borderRadius: 12,
-          padding: 20,
-          background: 'white',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-        }}>
+        <div 
+          onClick={() => navigate('/generation')}
+          style={{
+            border: '1px solid #e5e7eb',
+            borderRadius: 12,
+            padding: 20,
+            background: 'white',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = '#3b82f6'
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'
+            e.currentTarget.style.transform = 'translateY(-2px)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = '#e5e7eb'
+            e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)'
+            e.currentTarget.style.transform = 'translateY(0)'
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
             <div style={{
               width: 40,

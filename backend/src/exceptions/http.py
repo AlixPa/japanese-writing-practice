@@ -9,6 +9,11 @@ class WrongArgumentException(Exception):
         super().__init__(*args)
 
 
+class UnAuthorizedException(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
+
 class HTTPSNotFoundException(HTTPException):
     def __init__(self, detail: str | None = None):
         super().__init__(status_code=404, detail=detail)
@@ -29,6 +34,11 @@ class HTTPSqlmodelAlreadyExistsException(HTTPException):
 class HTTPWrongAttributesException(HTTPException):
     def __init__(self, detail: str | None = None):
         super().__init__(status_code=400, detail=detail)
+
+
+class HTTPUnAuthorizedException(HTTPException):
+    def __init__(self, detail: str | None = None):
+        super().__init__(status_code=401, detail=detail)
 
 
 class HTTPServerException(HTTPException):

@@ -12,6 +12,17 @@ export type StoriesResponse = StoryResponse[]
 export interface AudioMetadata { audio_text: string; audio_url: string }
 export type SentenceMetadataResponse = AudioMetadata[]
 
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public detail?: string
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
 async function apiFetch<T = unknown>(
   input: RequestInfo,
   init?: RequestInit,
@@ -32,7 +43,23 @@ async function apiFetch<T = unknown>(
     headers,
   })
 
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+  if (!res.ok) {
+    // Try to parse error detail from response
+    let detail: string | undefined
+    try {
+      const errorData = await res.json().catch(() => null)
+      detail = errorData?.detail || errorData?.message || undefined
+    } catch {
+      // If parsing fails, use status text
+      detail = res.statusText
+    }
+    
+    throw new ApiError(
+      `Request failed: ${res.status}`,
+      res.status,
+      detail
+    )
+  }
   // Handle 204 with void type
   // @ts-ignore
   if (res.status === 204) return undefined

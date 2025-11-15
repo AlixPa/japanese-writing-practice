@@ -1,23 +1,35 @@
 import React from 'react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { useAuth } from '@/contexts/AuthContext'
 
-type TabKey = 'home' | 'sample1' | 'sample2' | 'sample3'
-
-interface SidebarProps {
-  activeTab: TabKey
-  onChange: (tab: TabKey) => void
-}
-
-const menuItems: { key: TabKey; label: string }[] = [
-  { key: 'home', label: 'Home' },
-  { key: 'sample1', label: 'Dictation' },
-  { key: 'sample2', label: 'Configuration' },
-  { key: 'sample3', label: 'Generation' },
+const menuItems: { path: string; label: string }[] = [
+  { path: '/', label: 'Home' },
+  { path: '/dictation', label: 'Dictation' },
+  { path: '/configuration', label: 'Configuration' },
+  { path: '/generation', label: 'Generation' },
 ]
 
-export function Sidebar({ activeTab, onChange }: SidebarProps) {
-  const { isAuthenticated, handleCredentialResponse, logout } = useAuth()
+export function Sidebar() {
+  const { isAuthenticated, handleCredentialResponse, logout, token } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const prevTokenRef = React.useRef<string | null>(null)
+
+  // Redirect to root when user logs in or logs out (token changes)
+  React.useEffect(() => {
+    const prevToken = prevTokenRef.current
+    prevTokenRef.current = token
+    
+    // Redirect if token changed (login: null -> value, or logout: value -> null)
+    if (token !== prevToken && location.pathname !== '/') {
+      // Small delay to ensure data has time to refetch
+      const timer = setTimeout(() => {
+        navigate('/')
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [token, navigate, location.pathname])
 
   return (
     <aside style={{
@@ -69,6 +81,7 @@ export function Sidebar({ activeTab, onChange }: SidebarProps) {
               onSuccess={(credentialResponse) => {
                 if (credentialResponse.credential) {
                   handleCredentialResponse(credentialResponse)
+                  // Navigation will happen via useEffect when token changes
                 }
               }}
               onError={() => {
@@ -81,11 +94,11 @@ export function Sidebar({ activeTab, onChange }: SidebarProps) {
 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
         {menuItems.map(item => {
-          const isActive = activeTab === item.key
+          const isActive = location.pathname === item.path
           return (
-            <button
-              key={item.key}
-              onClick={() => onChange(item.key)}
+            <NavLink
+              key={item.path}
+              to={item.path}
               style={{
                 textAlign: 'left',
                 padding: '8px 10px',
@@ -93,11 +106,13 @@ export function Sidebar({ activeTab, onChange }: SidebarProps) {
                 border: '1px solid ' + (isActive ? '#3b82f6' : '#e5e7eb'),
                 background: isActive ? '#eff6ff' : 'white',
                 color: isActive ? '#1d4ed8' : '#111827',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                textDecoration: 'none',
+                display: 'block'
               }}
             >
               {item.label}
-            </button>
+            </NavLink>
           )
         })}
       </nav>

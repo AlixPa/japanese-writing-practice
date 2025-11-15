@@ -1,6 +1,11 @@
 from fastapi import APIRouter, Depends, status
 from src.dependencies.authentification import get_current_user
-from src.exceptions.http import HTTPWrongAttributesException, WrongArgumentException
+from src.exceptions.http import (
+    HTTPUnAuthorizedException,
+    HTTPWrongAttributesException,
+    UnAuthorizedException,
+    WrongArgumentException,
+)
 from src.logger import get_logger
 
 from .models import ConfigModel
@@ -23,7 +28,10 @@ async def post_config(
 ) -> None:
     logger.info(f"On POST /config, got {config=}")
 
-    await add_or_update_config(config=config, user_id=user_id)
+    try:
+        await add_or_update_config(config=config, user_id=user_id)
+    except UnAuthorizedException as e:
+        raise HTTPUnAuthorizedException(str(e))
 
     return
 

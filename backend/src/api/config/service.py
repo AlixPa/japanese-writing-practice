@@ -1,8 +1,8 @@
 import json
 
 from src.clients.sqlite import SQLiteClient, SqliteIdNotFoundError
-from src.config.env_var import DEFAULT_CONFIG_ID
-from src.exceptions.http import WrongArgumentException
+from src.config.env_var import DEFAULT_CONFIG_ID, DEFAULT_USER_ID
+from src.exceptions.http import UnAuthorizedException, WrongArgumentException
 from src.logger import get_logger
 from src.models.database import Configs
 
@@ -61,6 +61,11 @@ async def remove_config(config_id: str) -> None:
 
 
 async def add_or_update_config(config: ConfigModel, user_id: str) -> str:
+    if user_id == DEFAULT_USER_ID:
+        raise UnAuthorizedException(
+            "Cannot add or modify a configuration if user is not connected."
+        )
+
     sqlite = SQLiteClient(logger)
 
     config_table = Configs(
