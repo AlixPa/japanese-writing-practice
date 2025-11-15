@@ -3,13 +3,13 @@ A writing dictation application that lets you play dictations with custom config
 
 By default, some dictations are provided based on WaniKani vocabulary per level.
 
-## Access the application
+## Access the public application
 
 Application is available at:
 
 https://jwp.alixparadis.com/
 
-## Getting Started
+## Deploy locally
 
 Before running the application, ensure Docker Desktop is installed (and latest version!):
 
