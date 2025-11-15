@@ -38,27 +38,35 @@ jobs:
           docker push ${{ steps.ecr.outputs.registry }}/alixparadis/japanese-writing-practice:jwp-app-latest
 
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.9
+        uses: appleboy/ssh-action@v1
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+          AWS_ACCESS_KEY_GITHUB: ${{ secrets.AWS_ACCESS_KEY_GITHUB }}
+          AWS_SECRET_ACCESS_KEY_GITHUB: ${{ secrets.AWS_SECRET_ACCESS_KEY_GITHUB }}
+          AWS_ACCESS_KEY_APP: ${{ secrets.AWS_ACCESS_KEY_APP }}
+          AWS_SECRET_ACCESS_KEY_APP: ${{ secrets.AWS_SECRET_ACCESS_KEY_APP }}
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: 22
+          envs: ECR_REGISTRY,AWS_ACCESS_KEY_GITHUB,AWS_SECRET_ACCESS_KEY_GITHUB,AWS_ACCESS_KEY_APP,AWS_SECRET_ACCESS_KEY_APP
           script: |
-            export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_GITHUB }}
-            export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_GITHUB }}
+            aws --version
+            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_GITHUB
+            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_GITHUB
             export AWS_DEFAULT_REGION=ap-northeast-1
             aws ecr get-login-password | docker login \
               --username AWS \
-              --password-stdin ${{ steps.ecr.outputs.registry }}
+              --password-stdin $ECR_REGISTRY
             docker network create jwp_network || true
-            docker pull ${{ steps.ecr.outputs.registry }}/alixparadis/japanese-writing-practice:jwp-app-latest
+            docker pull $ECR_REGISTRY/alixparadis/japanese-writing-practice:jwp-app-latest
             docker stop jwp-deployement || true
             docker rm jwp-deployement || true
             docker run -d --name jwp-deployement \
               --network jwp_network \
-              -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_APP }} \
-              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY_APP }} \
+              -e AWS_ACCESS_KEY=$AWS_ACCESS_KEY_APP \
+              -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_APP \
               -e USES_LOCAL_FILES=False \
               -e SYNC_DB_S3=True \
-              ${{ steps.ecr.outputs.registry }}/alixparadis/japanese-writing-practice:jwp-app-latest
+              $ECR_REGISTRY/alixparadis/japanese-writing-practice:jwp-app-latest
