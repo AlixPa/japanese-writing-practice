@@ -31,11 +31,11 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag jwp-app:latest ${{ steps.ecr.outputs.registry }}/alixparadis/japanese-writing-practice/jwp-app:latest
+          docker tag jwp-app:latest ${{ steps.ecr.outputs.registry }}/alixparadis/japanese-writing-practice:latest
 
       - name: Push Docker image to ECR
         run: |
-          docker push ${{ steps.ecr.outputs.registry }}/alixparadis/japanese-writing-practice/jwp-app:latest
+          docker push ${{ steps.ecr.outputs.registry }}/alixparadis/japanese-writing-practice:latest
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.9
