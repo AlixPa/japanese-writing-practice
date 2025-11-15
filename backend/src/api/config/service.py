@@ -35,19 +35,19 @@ def sequence_to_str(
 async def load_configs(user_id: str) -> list[ConfigModel]:
     sqlite = SQLiteClient(logger)
 
-    configs_table = sqlite.select(table=Configs, cond_equal=dict(user_id=user_id))
+    configs = sqlite.select(table=Configs, cond_equal=dict(user_id=user_id))
 
     # If no configs, copy default one for the user
-    if not configs_table:
+    if not configs:
         default_config = sqlite.select_by_id(table=Configs, id=DEFAULT_CONFIG_ID)
         new_config = Configs(
             name=default_config.name, sequence=default_config.sequence, user_id=user_id
         )
-        sqlite.insert_one(table=Configs, to_insert=default_config)
-        configs_table = [new_config]
+        sqlite.insert_one(table=Configs, to_insert=new_config)
+        configs = [new_config]
     return [
         ConfigModel(id=c.id, name=c.name, sequence=str_to_sequence(c.sequence))
-        for c in configs_table
+        for c in configs
     ]
 
 
