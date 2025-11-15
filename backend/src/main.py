@@ -9,15 +9,17 @@ from fastapi.staticfiles import StaticFiles
 from .api import api_router
 from .config.env_var import ENV
 from .config.path import path_config
-from .config.runtime import service_env
+from .config.runtime import USES_LOCAL_FILES, service_env
 from .scripts.manage_dbfile_s3 import load_sqlite_file, save_sqlite_file
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    load_sqlite_file()
+    if not USES_LOCAL_FILES:
+        load_sqlite_file()
     yield
-    save_sqlite_file()
+    if not USES_LOCAL_FILES:
+        save_sqlite_file()
 
 
 app = FastAPI(lifespan=lifespan)
