@@ -1,4 +1,29 @@
 services:
+  jwp-deployement:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    env_file:
+      - .env
+    environment:
+      USES_LOCAL_FILES: False
+      SYNC_DB_S3: True
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    networks:
+      - jwp_network
+    expose:
+      - "8080"
+    entrypoint:
+      [
+        "uvicorn",
+        "src.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8080",
+      ]
+
   backend:
     build:
       context: .
@@ -92,3 +117,8 @@ services:
     container_name: voicevox
     ports:
       - "${VOICEVOX_PORT}:50021"
+
+networks:
+  jwp_network:
+    name: jwp_network
+    driver: bridge
