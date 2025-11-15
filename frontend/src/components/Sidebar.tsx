@@ -79,10 +79,8 @@ export function Sidebar() {
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <GoogleLogin
               onSuccess={(credentialResponse) => {
-                if (credentialResponse.credential) {
-                  handleCredentialResponse(credentialResponse)
-                  // Navigation will happen via useEffect when token changes
-                }
+                handleCredentialResponse(credentialResponse)
+                // Navigation will happen via useEffect when token changes
               }}
               onError={() => {
                 console.error('Login Failed')

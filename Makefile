@@ -54,8 +54,11 @@ new-migration:
 run-migrations:
 	./shell/run_migrations.sh
 
+build-frontend:
+	./shell/build_front.sh
+
 .PHONY: $(foreach s,$(SERVICES),run-$(s) rebuild-$(s) logs-$(s)) \
 	stop clean app frontend-dev backend-dev clear-DANGER \
 	web-dev web-build web-check \
-	new-migration run-migrations
+	new-migration run-migrations build-frontend
 # 	app-advanced
