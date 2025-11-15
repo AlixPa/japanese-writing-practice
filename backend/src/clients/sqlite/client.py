@@ -2,7 +2,7 @@ import sqlite3
 import traceback
 from abc import ABC
 from logging import Logger
-from typing import Any, Literal, Type, TypeVar, cast
+from typing import Any, Literal, Type, TypeVar
 
 from src.config.path import path_config
 from src.logger import get_logger
