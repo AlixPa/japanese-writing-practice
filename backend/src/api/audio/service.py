@@ -1,8 +1,8 @@
 from src.clients.aws import S3Client
 from src.clients.sqlite import SQLiteClient, SqliteIdNotFoundError
 from src.config.aws import aws_config
-from src.config.runtime import USES_LOCAL_FILES
 from src.config.path import path_config
+from src.config.runtime import USES_LOCAL_FILES
 from src.exceptions.http import WrongArgumentException
 from src.logger import get_logger
 from src.models.database import (

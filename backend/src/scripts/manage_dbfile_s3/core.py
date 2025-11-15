@@ -1,7 +1,8 @@
-from src.clients.aws import S3Client
-from src.config.path import path_config
-from src.config.aws import aws_config
 import time
+
+from src.clients.aws import S3Client
+from src.config.aws import aws_config
+from src.config.path import path_config
 
 
 def load_sqlite_file() -> None:

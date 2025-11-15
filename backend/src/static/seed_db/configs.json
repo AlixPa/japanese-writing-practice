@@ -1,0 +1,1 @@
+[{"id": "2c398078-62ec-40a8-bf61-a738c709d666", "name": "Default Configuration", "sequence": "[{\"speed\": 100}, {\"wait\": 5}, {\"wait\": 6, \"speed\": 65, \"repeat\": 2}, {\"wait\": 20}, {\"speed\": 90}, {\"wait\": 10}, {\"wait\": 5, \"speed\": 100, \"repeat\": 1}, {\"wait\": 10}, {\"speed\": 100}]"}]
