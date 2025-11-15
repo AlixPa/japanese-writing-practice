@@ -11,7 +11,7 @@ const menuItems: { path: string; label: string }[] = [
 ]
 
 export function Sidebar() {
-  const { isAuthenticated, handleCredentialResponse, logout, token } = useAuth()
+  const { isAuthenticated, handleCredentialResponse, logout, token, userInfo } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const prevTokenRef = React.useRef<string | null>(null)
@@ -52,9 +52,23 @@ export function Sidebar() {
       }}>
         {isAuthenticated ? (
           <>
+            {userInfo?.email && (
+              <div style={{
+                padding: '8px 10px',
+                fontSize: 12,
+                color: '#111827',
+                textAlign: 'center',
+                fontWeight: 500,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                {userInfo.email}
+              </div>
+            )}
             <div style={{
-              padding: '8px 10px',
-              fontSize: 12,
+              padding: '4px 10px',
+              fontSize: 11,
               color: '#6b7280',
               textAlign: 'center'
             }}>
