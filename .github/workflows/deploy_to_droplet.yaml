@@ -45,6 +45,9 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           port: 22
           script: |
+            echo "${{ secrets.AWS_SECRET_ACCESS_KEY_GITHUB }}" | docker login \
+              --username AWS \
+              --password-stdin ${{ steps.ecr.outputs.registry }}
             docker network create jwp_network || true
             docker pull ${{ steps.ecr.outputs.registry }}/alixparadis/japanese-writing-practice/jwp-app:latest
             docker stop jwp-deployement || true
