@@ -6,7 +6,7 @@ import react from '@vitejs/plugin-react'
 
 const env = loadEnv("", process.cwd(), "");
 
-const backendHost = env.BACKEND_HOST || "https://localhost";
+const backendHost = env.BACKEND_HOST || "http://localhost";
 const backendPort = env.BACKEND_PORT || "8080";
 const backendUrl = `${backendHost}:${backendPort}`;
 

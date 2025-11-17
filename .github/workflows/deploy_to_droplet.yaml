@@ -70,4 +70,6 @@ jobs:
               -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_APP \
               -e USES_LOCAL_FILES=False \
               -e SYNC_DB_S3=True \
+              -e BACKEND_HOST=https://localhost \
+              -e BACKEND_PORT=8080 \
               $ECR_REGISTRY/alixparadis/japanese-writing-practice:jwp-app-latest
