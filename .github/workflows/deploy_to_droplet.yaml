@@ -65,6 +65,7 @@ jobs:
             docker rm jwp-deployement || true
             docker run -d --name jwp-deployement \
               --network jwp_network \
+              --restart unless-stopped \
               -e AWS_ACCESS_KEY=$AWS_ACCESS_KEY_APP \
               -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_APP \
               -e USES_LOCAL_FILES=False \
