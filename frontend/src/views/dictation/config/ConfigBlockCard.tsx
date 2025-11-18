@@ -59,8 +59,8 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
         )}
       </div>
 
-      {/* Second row: Controls - wraps on mobile, inline on desktop */}
-      <div className="flex flex-wrap items-center gap-2 md:gap-1.5">
+      {/* Second row: Controls - stacked on mobile, horizontal on desktop */}
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-1.5">
         {block.type === 'full' && (
           isEditMode ? (
             <SpeedSelector
