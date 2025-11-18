@@ -34,71 +34,34 @@ export function ProgressBar({ current, total, isPaused }: Props) {
   }
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      gap: 8,
-      padding: '6px 8px',
-      background: 'rgba(255, 255, 255, 0.7)',
-      borderRadius: 6,
-      border: '1px solid rgba(0, 0, 0, 0.1)'
-    }}>
-      <span style={{ 
-        fontSize: '11px', 
-        color: '#4b5563', 
-        minWidth: '30px',
-        fontFamily: 'monospace',
-        fontWeight: 500
-      }}>
+    <div className="flex items-center gap-2 p-1.5 md:p-2 bg-white/70 rounded-md border border-black/10 min-h-[44px]">
+      <span className="text-[11px] text-gray-600 min-w-[30px] font-mono font-medium">
         {formatTime(currentSeconds)}
       </span>
       
-      <div style={{ 
-        flex: 1, 
-        height: 4, 
-        background: 'rgba(0, 0, 0, 0.1)', 
-        borderRadius: 2,
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{
-          width: `${percentage}%`,
-          height: '100%',
-          background: isPaused ? '#f59e0b' : '#3b82f6',
-          borderRadius: 2,
-          transition: 'width 0.1s ease-out',
-          position: 'relative'
-        }}>
+      <div className="flex-1 h-1 md:h-1.5 bg-black/10 rounded-sm relative overflow-hidden">
+        <div 
+          className={`h-full rounded-sm transition-[width] duration-100 ease-out relative ${
+            isPaused ? 'bg-amber-500' : 'bg-blue-500'
+          }`}
+          style={{ width: `${percentage}%` }}
+        >
           {/* Animated shimmer effect when playing */}
           {!isPaused && (
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-              animation: 'shimmer 2s infinite',
-              transform: 'translateX(-100%)',
-              animationName: 'shimmer',
-              animationDuration: '2s',
-              animationIterationCount: 'infinite',
-              animationTimingFunction: 'linear'
-            }} />
+            <div 
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+              style={{
+                animation: 'shimmer 2s infinite linear',
+                transform: 'translateX(-100%)'
+              }}
+            />
           )}
         </div>
       </div>
       
-      <span style={{ 
-        fontSize: '11px', 
-        color: '#4b5563', 
-        minWidth: '30px',
-        fontFamily: 'monospace',
-        fontWeight: 500
-      }}>
+      <span className="text-[11px] text-gray-600 min-w-[30px] font-mono font-medium">
         {formatTime(totalSeconds)}
       </span>
-      
     </div>
   )
 }
