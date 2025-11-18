@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { api, StoryResponse } from '@/api/client'
 import { Player } from './components/Player'
 import { StoryBlock } from './components/StoryBlock'
 import { useConfigById } from '@/hooks/useConfigById'
+import { Dropdown, type DropdownItem } from '@/components/Dropdown'
 
 export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: string }) {
   const [level, setLevel] = useState<number>(1)
@@ -13,9 +14,6 @@ export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: stri
   const [selectedStory, setSelectedStory] = useState<StoryResponse | null>(null)
   const [revealed, setRevealed] = useState<boolean>(false)
   const [playError, setPlayError] = useState<string | null>(null)
-  const [isStoryDropdownOpen, setIsStoryDropdownOpen] = useState<boolean>(false)
-  const storyDropdownRef = useRef<HTMLDivElement>(null)
-  const storyButtonRef = useRef<HTMLButtonElement>(null)
   
   const { config: selectedConfig } = useConfigById(selectedConfigId)
   const configSequence = selectedConfig?.sequence || []
@@ -53,25 +51,6 @@ export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: stri
   useEffect(() => {
     setLevelInput(level.toString())
   }, [level])
-
-  // Close story dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        storyDropdownRef.current &&
-        !storyDropdownRef.current.contains(event.target as Node) &&
-        storyButtonRef.current &&
-        !storyButtonRef.current.contains(event.target as Node)
-      ) {
-        setIsStoryDropdownOpen(false)
-      }
-    }
-
-    if (isStoryDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isStoryDropdownOpen])
 
 
 
@@ -141,68 +120,19 @@ export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: stri
       {stories.length > 0 && (
         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
           <label className="text-gray-500 text-sm md:min-w-[60px]">Story</label>
-          <div className="relative min-w-0 flex-1 md:flex-initial">
-            <button
-              ref={storyButtonRef}
-              onClick={() => setIsStoryDropdownOpen(!isStoryDropdownOpen)}
-              className="w-full min-w-0 px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-900 cursor-pointer text-sm font-medium min-h-[44px] shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flex items-center gap-2"
-            >
-              <span className="min-w-0 flex-1 overflow-hidden">
-                <span className="block truncate text-left">{selectedStory?.story_title || `Story ${selectedStory?.story_id}` || 'Select story'}</span>
-              </span>
-              <svg
-                className={`w-4 h-4 text-gray-500 transition-transform flex-shrink-0 ${isStoryDropdownOpen ? 'rotate-180' : ''}`}
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {isStoryDropdownOpen && (
-              <div
-                ref={storyDropdownRef}
-                className="absolute top-full left-0 mt-1 min-w-full w-auto bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-auto"
-              >
-                {stories.map((story) => (
-                  <button
-                    key={story.story_id}
-                    onClick={() => {
-                      setSelectedStory(story)
-                      setIsStoryDropdownOpen(false)
-                      setRevealed(false)
-                    }}
-                    className={`w-full text-left px-3 py-2 text-sm min-h-[44px] flex items-center gap-2 hover:bg-gray-50 transition-colors ${
-                      story.story_id === selectedStory?.story_id
-                        ? 'bg-blue-50 text-blue-700 font-medium'
-                        : 'text-gray-900'
-                    }`}
-                  >
-                    {story.story_id === selectedStory?.story_id && (
-                      <svg
-                        className="w-4 h-4 text-blue-700 flex-shrink-0"
-                        fill="none"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                    <span className={`${story.story_id === selectedStory?.story_id ? '' : 'ml-6'} whitespace-nowrap`}>
-                      {story.story_title || `Story ${story.story_id}`}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <Dropdown
+            items={stories.map(story => ({
+              id: story.story_id,
+              label: story.story_title || `Story ${story.story_id}`
+            }))}
+            value={selectedStory?.story_id || ''}
+            onChange={(id) => {
+              const story = stories.find(s => s.story_id === id)
+              setSelectedStory(story || null)
+              setRevealed(false)
+            }}
+            placeholder="Select story"
+          />
         </div>
       )}
 
