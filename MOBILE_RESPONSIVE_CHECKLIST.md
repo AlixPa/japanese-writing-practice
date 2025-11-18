@@ -176,14 +176,14 @@ This checklist provides a step-by-step approach to make the app mobile-responsiv
 
 ### ✅ Step 3.4: Convert CustomGenerationView to Responsive
 **Goal**: Make custom generation view mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Responsive padding: `p-4 md:p-6`
-- [ ] Responsive card max-width: `max-w-full md:max-w-md`
-- [ ] Responsive font sizes
+- [x] Replace inline styles with Tailwind classes ✓
+- [x] Responsive padding: `p-4 md:p-6` ✓
+- [x] Responsive card max-width: `max-w-full md:max-w-md` ✓
+- [x] Responsive font sizes ✓
 - [ ] Test: Content centered and readable on mobile
 
-**Files to modify:**
-- `frontend/src/views/CustomGenerationView.tsx`
+**Files modified:**
+- `frontend/src/views/CustomGenerationView.tsx` ✓
 
 **Success criteria:**
 - Content readable on all screen sizes
@@ -193,16 +193,16 @@ This checklist provides a step-by-step approach to make the app mobile-responsiv
 
 ### ✅ Step 3.5: Convert DictationWaniKani to Responsive
 **Goal**: Make WaniKani dictation view mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Stack level selector and story selector on mobile
-- [ ] Make story list items touch-friendly
-- [ ] Responsive padding: `p-4 md:p-6`
-- [ ] Ensure Player component fits on mobile (will be handled in Step 4.3)
+- [x] Replace inline styles with Tailwind classes ✓
+- [x] Stack level selector and story selector on mobile ✓
+- [x] Make story list items touch-friendly ✓
+- [x] Responsive padding: `p-4 md:p-6` ✓
+- [x] Ensure Player component fits on mobile (handled in Step 4.3) ✓
 - [ ] Test: Story selection works on mobile
 - [ ] Test: Level selector accessible
 
-**Files to modify:**
-- `frontend/src/views/dictation/WaniKani.tsx`
+**Files modified:**
+- `frontend/src/views/dictation/WaniKani.tsx` ✓
 
 **Success criteria:**
 - All controls accessible on mobile
@@ -213,12 +213,12 @@ This checklist provides a step-by-step approach to make the app mobile-responsiv
 
 ### ✅ Step 3.6: Convert DictationCustom to Responsive
 **Goal**: Make custom dictation view mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Responsive padding and max-width
+- [x] Replace inline styles with Tailwind classes ✓
+- [x] Responsive padding and max-width ✓
 - [ ] Test: "Coming Soon" message displays properly
 
-**Files to modify:**
-- `frontend/src/views/dictation/Custom.tsx`
+**Files modified:**
+- `frontend/src/views/dictation/Custom.tsx` ✓
 
 **Success criteria:**
 - Content readable on all screen sizes
@@ -229,24 +229,24 @@ This checklist provides a step-by-step approach to make the app mobile-responsiv
 
 ### ✅ Step 4.1: Convert Sidebar to Tailwind (if not done in 2.3)
 **Goal**: Complete Sidebar conversion
-- [ ] Replace any remaining inline styles
-- [ ] Ensure all interactive elements are touch-friendly
+- [x] Replace any remaining inline styles ✓ (Done in Step 2.3)
+- [x] Ensure all interactive elements are touch-friendly ✓
 - [ ] Test: Sidebar works on desktop
 
-**Files to modify:**
-- `frontend/src/components/Sidebar.tsx`
+**Files modified:**
+- `frontend/src/components/Sidebar.tsx` ✓ (Done in Step 2.3)
 
 ---
 
 ### ✅ Step 4.2: Convert ConfigSelector to Responsive
 **Goal**: Make config selector mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Make select full-width on mobile: `w-full md:w-auto`
-- [ ] Ensure touch-friendly size: `min-h-[44px]`
+- [x] Replace inline styles with Tailwind classes ✓ (Uses Dropdown component)
+- [x] Make select full-width on mobile: `w-full md:w-auto` ✓
+- [x] Ensure touch-friendly size: `min-h-[44px]` ✓
 - [ ] Test: Selector usable on mobile
 
-**Files to modify:**
-- `frontend/src/views/dictation/components/ConfigSelector.tsx`
+**Files modified:**
+- `frontend/src/views/dictation/components/ConfigSelector.tsx` ✓
 
 **Success criteria:**
 - Select dropdown is easy to use on mobile
@@ -256,16 +256,16 @@ This checklist provides a step-by-step approach to make the app mobile-responsiv
 
 ### ✅ Step 4.3: Convert Player Component to Responsive
 **Goal**: Make audio player mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Stack controls vertically on mobile if needed
-- [ ] Make buttons touch-friendly: `min-h-[44px] min-w-[44px]`
-- [ ] Responsive font sizes for text
-- [ ] Ensure progress bar is touch-friendly
+- [x] Replace inline styles with Tailwind classes ✓
+- [x] Stack controls vertically on mobile if needed ✓
+- [x] Make buttons touch-friendly: `min-h-[44px] min-w-[44px]` ✓
+- [x] Responsive font sizes for text ✓
+- [x] Ensure progress bar is touch-friendly ✓
 - [ ] Test: All player controls work on mobile
 - [ ] Test: Progress bar is draggable on mobile
 
-**Files to modify:**
-- `frontend/src/views/dictation/components/Player.tsx`
+**Files modified:**
+- `frontend/src/views/dictation/components/Player.tsx` ✓
 
 **Success criteria:**
 - All controls accessible and usable
@@ -276,13 +276,13 @@ This checklist provides a step-by-step approach to make the app mobile-responsiv
 
 ### ✅ Step 4.4: Convert PlayerSequence to Responsive
 **Goal**: Make player sequence display mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Responsive font sizes
-- [ ] Ensure sequence items are readable on mobile
+- [x] Replace inline styles with Tailwind classes ✓
+- [x] Responsive font sizes ✓
+- [x] Ensure sequence items are readable on mobile ✓
 - [ ] Test: Sequence display works on mobile
 
-**Files to modify:**
-- `frontend/src/views/dictation/components/PlayerSequence.tsx`
+**Files modified:**
+- `frontend/src/views/dictation/components/PlayerSequence.tsx` ✓
 
 ---
 
@@ -312,14 +312,14 @@ This checklist provides a step-by-step approach to make the app mobile-responsiv
 
 ### ✅ Step 4.7: Convert ConfigEditor to Responsive
 **Goal**: Make config editor mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Stack form elements on mobile
-- [ ] Make inputs full-width on mobile
-- [ ] Ensure drag-and-drop works on mobile (or provide alternative)
+- [x] Replace inline styles with Tailwind classes ✓
+- [x] Stack form elements on mobile ✓
+- [x] Make inputs full-width on mobile ✓
+- [x] Ensure drag-and-drop works on mobile (or provide alternative) ✓ (Replaced with click-to-add buttons)
 - [ ] Test: Editor is usable on mobile
 
-**Files to modify:**
-- `frontend/src/views/dictation/config/ConfigEditor.tsx`
+**Files modified:**
+- `frontend/src/views/dictation/config/ConfigEditor.tsx` ✓
 
 **Success criteria:**
 - All form controls accessible
@@ -329,25 +329,25 @@ This checklist provides a step-by-step approach to make the app mobile-responsiv
 
 ### ✅ Step 4.8: Convert ConfigBlockCard to Responsive
 **Goal**: Make config block cards mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Responsive padding and sizing
-- [ ] Make buttons touch-friendly
+- [x] Replace inline styles with Tailwind classes ✓
+- [x] Responsive padding and sizing ✓
+- [x] Make buttons touch-friendly ✓
 - [ ] Test: Cards are usable on mobile
 
-**Files to modify:**
-- `frontend/src/views/dictation/config/ConfigBlockCard.tsx`
+**Files modified:**
+- `frontend/src/views/dictation/config/ConfigBlockCard.tsx` ✓
 
 ---
 
 ### ✅ Step 4.9: Convert SpeedSelector to Responsive
 **Goal**: Make speed selector mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Ensure select is touch-friendly
-- [ ] Responsive sizing
+- [x] Replace inline styles with Tailwind classes ✓
+- [x] Ensure select is touch-friendly ✓
+- [x] Responsive sizing ✓
 - [ ] Test: Selector works on mobile
 
-**Files to modify:**
-- `frontend/src/components/SpeedSelector.tsx`
+**Files modified:**
+- `frontend/src/components/SpeedSelector.tsx` ✓
 
 ---
 
