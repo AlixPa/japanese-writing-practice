@@ -7,6 +7,7 @@ from src.exceptions.http import (
     WrongArgumentException,
 )
 from src.logger import get_logger
+from src.models.uuid4str import UUID4Str
 
 from .models import ConfigModel
 from .service import add_or_update_config, load_configs, remove_config
@@ -24,7 +25,7 @@ async def get_configs(user_id: str = Depends(get_current_user)) -> list[ConfigMo
 
 @router.post("", status_code=status.HTTP_204_NO_CONTENT)
 async def post_config(
-    config: ConfigModel, user_id: str = Depends(get_current_user)
+    config: ConfigModel, user_id: UUID4Str = Depends(get_current_user)
 ) -> None:
     logger.info(f"On POST /config, got {config=}")
 
@@ -37,7 +38,7 @@ async def post_config(
 
 
 @router.delete("", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_config(config_id: str) -> None:
+async def delete_config(config_id: UUID4Str) -> None:
     logger.info(f"On DELETE /config, with {config_id=}")
 
     try:

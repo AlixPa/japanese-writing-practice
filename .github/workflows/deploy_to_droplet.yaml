@@ -14,6 +14,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        run: |
+          bun install
+          bun run build
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -73,5 +81,4 @@ jobs:
               -e SYNC_DB_S3=True \
               -e BACKEND_HOST=https://localhost \
               -e BACKEND_PORT=8080 \
-              -e GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID \
               $ECR_REGISTRY/alixparadis/japanese-writing-practice:jwp-app-latest

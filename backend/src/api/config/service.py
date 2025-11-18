@@ -5,6 +5,7 @@ from src.config.env_var import DEFAULT_CONFIG_ID, DEFAULT_USER_ID
 from src.exceptions.http import UnAuthorizedException, WrongArgumentException
 from src.logger import get_logger
 from src.models.database import Configs
+from src.models.uuid4str import UUID4Str
 
 from .models import ConfigModel, FullDictationElement, SentencesElement, WaitElement
 
@@ -51,7 +52,7 @@ async def load_configs(user_id: str) -> list[ConfigModel]:
     ]
 
 
-async def remove_config(config_id: str) -> None:
+async def remove_config(config_id: UUID4Str) -> None:
     sqlite = SQLiteClient(logger)
     try:
         sqlite.delete_by_id(table=Configs, id=config_id)
@@ -60,7 +61,7 @@ async def remove_config(config_id: str) -> None:
     return
 
 
-async def add_or_update_config(config: ConfigModel, user_id: str) -> str:
+async def add_or_update_config(config: ConfigModel, user_id: UUID4Str) -> str:
     if user_id == DEFAULT_USER_ID:
         raise UnAuthorizedException(
             "Cannot add or modify a configuration if user is not connected."
