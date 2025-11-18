@@ -15,7 +15,7 @@ export function DictationView() {
   return (
     <section className="flex flex-col gap-3 h-full">
       <div className="flex items-center gap-3 flex-wrap px-4 md:px-6 pt-2 md:pt-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full md:w-auto">
           <ConfigSelector configs={configs} value={selectedConfigId} onChange={setSelectedConfigId} />
         </div>
       </div>
