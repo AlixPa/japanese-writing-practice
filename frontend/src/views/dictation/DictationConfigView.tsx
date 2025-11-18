@@ -176,8 +176,7 @@ export function DictationConfigView() {
   if (configsLoading || !hasInitiallyLoaded) {
     return (
       <section className="flex flex-col gap-3 h-full">
-        <div className="flex items-center justify-between px-4 md:px-6 pt-2 md:pt-3">
-          <h1 className="m-0 text-xl md:text-2xl font-semibold text-gray-900">Configuration</h1>
+        <div className="flex items-center justify-end px-4 md:px-6 pt-2 md:pt-3">
           <div className="text-sm text-gray-500">Loading configurations...</div>
         </div>
         <div className="flex-1 flex flex-col border-t border-gray-200 overflow-hidden bg-white items-center justify-center">
@@ -199,7 +198,6 @@ export function DictationConfigView() {
         </div>
       )}
       <div className="flex flex-col md:flex-row md:items-center gap-3 px-4 md:px-6 pt-2 md:pt-3">
-        <h1 className="m-0 text-xl md:text-2xl font-semibold text-gray-900">Configuration</h1>
         <div className="flex flex-wrap items-center gap-2">
           <ConfigSelector configs={configs as any} value={selectedId || ''} onChange={handleSelect} />
           <button 

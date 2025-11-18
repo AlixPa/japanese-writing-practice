@@ -3,7 +3,6 @@ import React from 'react'
 export function CustomGenerationView() {
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
-      <h1 style={{ margin: 0, fontSize: 24 }}>Custom Generation</h1>
       <div style={{
         flex: 1,
         display: 'flex',
