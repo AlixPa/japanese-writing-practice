@@ -17,13 +17,22 @@ export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false)
   const prevTokenRef = React.useRef<string | null>(null)
 
-  // Redirect to root when user logs in or logs out (token changes)
+  // Redirect to root when user logs in or logs out (only on actual auth state change)
   React.useEffect(() => {
     const prevToken = prevTokenRef.current
+    
+    // Only redirect if there's an actual authentication state change:
+    // - Login: prevToken was null, now has a value
+    // - Logout: prevToken had a value, now is null
+    const wasLoggedIn = prevToken !== null
+    const isLoggedIn = token !== null
+    const authStateChanged = wasLoggedIn !== isLoggedIn
+    
+    // Update ref for next comparison
     prevTokenRef.current = token
     
-    // Redirect if token changed (login: null -> value, or logout: value -> null)
-    if (token !== prevToken && location.pathname !== '/') {
+    // Only redirect on actual login/logout, not on token updates
+    if (authStateChanged && location.pathname !== '/') {
       // Small delay to ensure data has time to refetch
       const timer = setTimeout(() => {
         navigate('/')
@@ -55,24 +64,29 @@ export function MobileNav() {
 
   return (
     <>
-      {/* Hamburger Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
-        aria-label="Open menu"
-      >
-        <svg
-          className="w-6 h-6 text-gray-700"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      {/* Mobile Header Bar - Always visible on mobile */}
+      <header className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-[100] flex items-center px-4 shadow-sm">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="p-2 -ml-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
+          aria-label="Open menu"
         >
-          <path d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
+          <svg
+            className="w-6 h-6 text-gray-700"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <h1 className="flex-1 text-base font-semibold text-gray-900 text-center pr-8">
+          Japanese Writing Practice
+        </h1>
+      </header>
 
       {/* Overlay */}
       {isOpen && (

@@ -114,17 +114,17 @@ This checklist provides a step-by-step approach to make the app mobile-responsiv
 
 ### ✅ Step 3.1: Convert WelcomeView to Responsive
 **Goal**: Make welcome page mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Responsive padding: `p-4 md:p-6`
-- [ ] Responsive font sizes: `text-2xl md:text-3xl` for heading
-- [ ] Responsive max-width: `max-w-full md:max-w-2xl`
-- [ ] Make cards stack properly on mobile
-- [ ] Adjust card padding: `p-4 md:p-5`
-- [ ] Test: Cards readable and clickable on mobile
-- [ ] Test: Layout looks good on desktop (unchanged)
+- [x] Replace inline styles with Tailwind classes ✓
+- [x] Responsive padding: `p-4 md:p-6` ✓
+- [x] Responsive font sizes: `text-2xl md:text-3xl` for heading ✓
+- [x] Responsive max-width: `max-w-full md:max-w-2xl` ✓
+- [x] Make cards stack properly on mobile ✓
+- [x] Adjust card padding: `p-4 md:p-5` ✓
+- [ ] Test: Cards readable and clickable on mobile - User will test
+- [ ] Test: Layout looks good on desktop (unchanged) - User will test
 
-**Files to modify:**
-- `frontend/src/views/WelcomeView.tsx`
+**Files modified:**
+- `frontend/src/views/WelcomeView.tsx` ✓ Converted to Tailwind, made responsive
 
 **Success criteria:**
 - All text readable on mobile
