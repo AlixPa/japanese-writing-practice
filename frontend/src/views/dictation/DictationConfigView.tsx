@@ -55,6 +55,7 @@ export function DictationConfigView() {
   const [toast, setToast] = useState<{ message: string; kind: 'success' | 'error' } | null>(null)
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false)
   const [isEditMode, setIsEditMode] = useState<boolean>(false)
+  const [isSaving, setIsSaving] = useState<boolean>(false)
   const selectedConfig = useMemo(() => configs.find(c => c.id === selectedId) || null, [configs, selectedId])
   
   // Create authenticated API instance
@@ -114,6 +115,7 @@ export function DictationConfigView() {
   }
 
   const handleSave = async () => {
+    setIsSaving(true)
     const payload = {
       id: selectedId || (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : Math.random().toString(36).slice(2)),
       name: nameDraft || 'Untitled',
@@ -139,6 +141,7 @@ export function DictationConfigView() {
         setToast({ message: 'Save failed. Please try again.', kind: 'error' })
       }
       setTimeout(() => setToast(null), 4000)
+      setIsSaving(false)
       return
     }
     const refreshed = await loadConfigs()
@@ -152,6 +155,7 @@ export function DictationConfigView() {
     setToast({ message: 'Saved successfully', kind: 'success' })
     setTimeout(() => setToast(null), 2000)
     setIsEditMode(false) // Exit edit mode after saving
+    setIsSaving(false)
   }
 
   const handleDelete = async () => {
@@ -253,10 +257,17 @@ export function DictationConfigView() {
                 className="px-3 py-2 border border-gray-200 rounded-lg min-h-[44px] w-full md:w-auto md:min-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <button 
-                onClick={handleSave} 
-                className="px-3 py-2 rounded-lg border border-green-200 bg-green-50 text-green-700 cursor-pointer text-sm font-medium min-h-[44px] hover:bg-green-100 transition-colors"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="px-3 py-2 rounded-lg border border-green-200 bg-green-50 text-green-700 cursor-pointer text-sm font-medium min-h-[44px] hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                Save
+                {isSaving && (
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
+                {isSaving ? 'Saving...' : 'Save'}
               </button>
               <button 
                 onClick={handleCancel} 
