@@ -175,39 +175,32 @@ export function DictationConfigView() {
 
   if (configsLoading || !hasInitiallyLoaded) {
     return (
-      <section style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h1 style={{ margin: 0, fontSize: 24 }}>Configuration</h1>
-          <div style={{ color: '#6b7280' }}>Loading configurations...</div>
+      <section className="flex flex-col gap-3 h-full">
+        <div className="flex items-center justify-between px-4 md:px-6 pt-2 md:pt-3">
+          <h1 className="m-0 text-xl md:text-2xl font-semibold text-gray-900">Configuration</h1>
+          <div className="text-sm text-gray-500">Loading configurations...</div>
         </div>
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          border: '1px solid #e5e7eb',
-          borderRadius: 12,
-          overflow: 'hidden',
-          background: 'white',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <div style={{ color: '#6b7280' }}>Loading...</div>
+        <div className="flex-1 flex flex-col border-t border-gray-200 overflow-hidden bg-white items-center justify-center">
+          <div className="text-gray-500">Loading...</div>
         </div>
       </section>
     )
   }
 
   return (
-    <section style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
+    <section className="flex flex-col gap-3 h-full">
       {toast && (
-        <div style={{ position: 'fixed', top: 16, right: 16, padding: '8px 12px', borderRadius: 8, color: toast.kind === 'success' ? '#065f46' : '#991b1b', background: toast.kind === 'success' ? '#ecfdf5' : '#fee2e2', border: `1px solid ${toast.kind === 'success' ? '#d1fae5' : '#fecaca'}`, boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}>
+        <div className={`fixed top-4 right-4 px-3 py-2 rounded-lg text-sm shadow-md z-50 ${
+          toast.kind === 'success'
+            ? 'text-green-800 bg-green-50 border border-green-200'
+            : 'text-red-800 bg-red-50 border border-red-200'
+        }`}>
           {toast.message}
         </div>
       )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <h1 style={{ margin: 0, fontSize: 24 }}>Configuration</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="flex flex-col md:flex-row md:items-center gap-3 px-4 md:px-6 pt-2 md:pt-3">
+        <h1 className="m-0 text-xl md:text-2xl font-semibold text-gray-900">Configuration</h1>
+        <div className="flex flex-wrap items-center gap-2">
           <ConfigSelector configs={configs as any} value={selectedId || ''} onChange={handleSelect} />
           <button 
             onClick={() => {
@@ -217,16 +210,7 @@ export function DictationConfigView() {
                 setNameDraft(name.trim())
               }
             }}
-            style={{ 
-              padding: '6px 8px', 
-              borderRadius: 8, 
-              border: '1px solid #d1fae5', 
-              background: '#ecfdf5', 
-              color: '#065f46', 
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: 'bold'
-            }}
+            className="px-3 py-2 rounded-lg border border-green-200 bg-green-50 text-green-700 cursor-pointer text-base font-bold min-h-[44px] hover:bg-green-100 transition-colors"
             title="Create new configuration"
           >
             +
@@ -235,25 +219,26 @@ export function DictationConfigView() {
             placeholder="Name"
             value={nameDraft}
             onChange={(e) => setNameDraft(e.target.value)}
-            style={{ padding: '6px 8px', border: '1px solid #e5e7eb', borderRadius: 8, minWidth: 200 }}
+            className="px-3 py-2 border border-gray-200 rounded-lg min-h-[44px] w-full md:w-auto md:min-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
-          <button onClick={handleSave} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #d1fae5', background: '#ecfdf5', color: '#065f46', cursor: 'pointer' }}>Save</button>
+          <button 
+            onClick={handleSave} 
+            className="px-3 py-2 rounded-lg border border-green-200 bg-green-50 text-green-700 cursor-pointer min-h-[44px] hover:bg-green-100 transition-colors"
+          >
+            Save
+          </button>
           {selectedId && (
-            <button onClick={handleDelete} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid #fecaca', background: '#fee2e2', color: '#991b1b', cursor: 'pointer' }}>Delete</button>
+            <button 
+              onClick={handleDelete} 
+              className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 cursor-pointer min-h-[44px] hover:bg-red-100 transition-colors"
+            >
+              Delete
+            </button>
           )}
         </div>
       </div>
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        border: '1px solid #e5e7eb',
-        borderRadius: 12,
-        overflow: 'hidden',
-        background: 'white',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-      }}>
-        <div style={{ padding: 16, height: '100%' }}>
+      <div className="flex-1 flex flex-col border-t border-gray-200 overflow-hidden bg-white">
+        <div className="p-4 h-full overflow-auto">
           <ConfigEditor blocks={blocks} onBlocksChange={setBlocks} />
         </div>
       </div>

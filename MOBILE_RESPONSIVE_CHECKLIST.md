@@ -155,17 +155,17 @@ This checklist provides a step-by-step approach to make the app mobile-responsiv
 
 ### ✅ Step 3.3: Convert DictationConfigView to Responsive
 **Goal**: Make configuration view mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Stack header controls vertically on mobile
-- [ ] Make input fields full-width on mobile: `w-full md:w-auto`
-- [ ] Stack buttons vertically on mobile or make them wrap
-- [ ] Responsive padding: `p-4 md:p-6`
-- [ ] Ensure ConfigEditor is scrollable on mobile
-- [ ] Test: Form is usable on mobile
-- [ ] Test: Save/Delete buttons accessible
+- [x] Replace inline styles with Tailwind classes ✓
+- [x] Stack header controls vertically on mobile ✓
+- [x] Make input fields full-width on mobile: `w-full md:w-auto` ✓
+- [x] Stack buttons vertically on mobile or make them wrap (using flex-wrap) ✓
+- [x] Responsive padding: `px-4 md:px-6 pt-2 md:pt-3` ✓
+- [x] Ensure ConfigEditor is scrollable on mobile ✓
+- [ ] Test: Form is usable on mobile - User will test
+- [ ] Test: Save/Delete buttons accessible - User will test
 
-**Files to modify:**
-- `frontend/src/views/dictation/DictationConfigView.tsx`
+**Files modified:**
+- `frontend/src/views/dictation/DictationConfigView.tsx` ✓ Converted to Tailwind, made responsive
 
 **Success criteria:**
 - All form controls accessible
