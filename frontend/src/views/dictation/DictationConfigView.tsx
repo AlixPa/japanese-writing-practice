@@ -56,6 +56,8 @@ export function DictationConfigView() {
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false)
   const [isEditMode, setIsEditMode] = useState<boolean>(false)
   const [isSaving, setIsSaving] = useState<boolean>(false)
+  const [isDeleting, setIsDeleting] = useState<boolean>(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false)
   const selectedConfig = useMemo(() => configs.find(c => c.id === selectedId) || null, [configs, selectedId])
   
   // Create authenticated API instance
@@ -158,8 +160,14 @@ export function DictationConfigView() {
     setIsSaving(false)
   }
 
-  const handleDelete = async () => {
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    setShowDeleteConfirm(false)
     if (!selectedId) return
+    setIsDeleting(true)
     try {
       await api.deleteConfig(selectedId)
     } catch (error: any) {
@@ -180,6 +188,7 @@ export function DictationConfigView() {
         setToast({ message: 'Delete failed. Please try again.', kind: 'error' })
       }
       setTimeout(() => setToast(null), 4000)
+      setIsDeleting(false)
       return
     }
     const refreshed = await loadConfigs()
@@ -195,6 +204,7 @@ export function DictationConfigView() {
     }
     setToast({ message: 'Deleted successfully', kind: 'success' })
     setTimeout(() => setToast(null), 2000)
+    setIsDeleting(false)
   }
 
   if (configsLoading || !hasInitiallyLoaded) {
@@ -221,17 +231,45 @@ export function DictationConfigView() {
           {toast.message}
         </div>
       )}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Configuration?</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Are you sure you want to delete "{selectedConfig?.name || 'this configuration'}"? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="px-4 py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm font-medium hover:bg-red-100 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row md:items-center gap-3 px-4 md:px-6 pt-2 md:pt-3">
         <div className="flex items-center gap-2 w-full min-w-0">
           {!isEditMode && (
-            <ConfigSelector 
-              configs={configs as any} 
-              value={selectedId || ''} 
-              onChange={handleSelect}
-            />
-          )}
-          {!isEditMode && (
             <>
+              <button 
+                onClick={setNewConfig}
+                className="px-3 py-2 rounded-lg border border-green-200 bg-green-50 text-green-700 cursor-pointer text-sm font-medium min-h-[44px] hover:bg-green-100 transition-colors flex-shrink-0"
+              >
+                New
+              </button>
+              <ConfigSelector 
+                configs={configs as any} 
+                value={selectedId || ''} 
+                onChange={handleSelect}
+              />
               {selectedId && (
                 <button 
                   onClick={handleEdit}
@@ -240,12 +278,21 @@ export function DictationConfigView() {
                   Edit
                 </button>
               )}
-              <button 
-                onClick={setNewConfig}
-                className="px-3 py-2 rounded-lg border border-green-200 bg-green-50 text-green-700 cursor-pointer text-sm font-medium min-h-[44px] hover:bg-green-100 transition-colors flex-shrink-0"
-              >
-                New
-              </button>
+              {selectedId && (
+                <button 
+                  onClick={handleDeleteClick}
+                  disabled={isDeleting}
+                  className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 cursor-pointer text-sm font-medium min-h-[44px] hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0"
+                >
+                  {isDeleting && (
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  )}
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </button>
+              )}
             </>
           )}
           {isEditMode && (
@@ -275,14 +322,6 @@ export function DictationConfigView() {
               >
                 Cancel
               </button>
-              {selectedId && (
-                <button 
-                  onClick={handleDelete} 
-                  className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 cursor-pointer text-sm font-medium min-h-[44px] hover:bg-red-100 transition-colors"
-                >
-                  Delete
-                </button>
-              )}
             </>
           )}
         </div>
