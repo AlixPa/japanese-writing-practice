@@ -13,55 +13,37 @@ export function DictationView() {
   useEffect(() => { if (configs.length && !selectedConfigId) setSelectedConfigId(configs[0].id) }, [configs, selectedConfigId])
 
   return (
-    <section style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <h1 style={{ margin: 0, fontSize: 24 }}>Dictation</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <section className="flex flex-col gap-3 h-full">
+      <div className="flex items-center gap-3 flex-wrap">
+        <h1 className="m-0 text-xl md:text-2xl font-semibold text-gray-900">Dictation</h1>
+        <div className="flex items-center gap-2">
           <ConfigSelector configs={configs} value={selectedConfigId} onChange={setSelectedConfigId} />
         </div>
       </div>
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        border: '1px solid #e5e7eb',
-        borderRadius: 12,
-        overflow: 'hidden',
-        background: 'white',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-      }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+      <div className="flex-1 flex flex-col border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+        <div className="grid grid-cols-2">
           <button
             onClick={() => setDictationMode('wanikani')}
-            style={{
-              padding: '12px 16px',
-              border: 'none',
-              background: dictationMode === 'wanikani' ? '#eef2ff' : '#f9fafb',
-              color: dictationMode === 'wanikani' ? '#1d4ed8' : '#111827',
-              fontWeight: 600,
-              cursor: 'pointer',
-              borderRight: '1px solid #e5e7eb',
-              outline: 'none'
-            }}
+            className={`px-4 py-3 border-none font-semibold cursor-pointer outline-none transition-colors min-h-[44px] ${
+              dictationMode === 'wanikani'
+                ? 'bg-blue-50 text-blue-700 border-r border-gray-200'
+                : 'bg-gray-50 text-gray-900 border-r border-gray-200 hover:bg-gray-100'
+            }`}
           >
             WaniKani
           </button>
           <button
             onClick={() => setDictationMode('custom')}
-            style={{
-              padding: '12px 16px',
-              border: 'none',
-              background: dictationMode === 'custom' ? '#eef2ff' : '#f9fafb',
-              color: dictationMode === 'custom' ? '#1d4ed8' : '#111827',
-              fontWeight: 600,
-              cursor: 'pointer',
-              outline: 'none'
-            }}
+            className={`px-4 py-3 border-none font-semibold cursor-pointer outline-none transition-colors min-h-[44px] ${
+              dictationMode === 'custom'
+                ? 'bg-blue-50 text-blue-700'
+                : 'bg-gray-50 text-gray-900 hover:bg-gray-100'
+            }`}
           >
             Custom
           </button>
         </div>
-        <div style={{ borderTop: '1px solid #e5e7eb', flex: 1, padding: 16, overflow: 'auto' }}>
+        <div className="border-t border-gray-200 flex-1 p-4 md:p-4 overflow-auto">
           {dictationMode === 'wanikani' ? (
             <DictationWaniKani selectedConfigId={selectedConfigId} />
           ) : (

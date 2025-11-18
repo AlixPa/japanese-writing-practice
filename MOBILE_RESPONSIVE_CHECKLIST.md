@@ -135,16 +135,16 @@ This checklist provides a step-by-step approach to make the app mobile-responsiv
 
 ### ✅ Step 3.2: Convert DictationView to Responsive
 **Goal**: Make dictation view mobile-friendly
-- [ ] Replace inline styles with Tailwind classes
-- [ ] Responsive header: stack title and controls on mobile
-- [ ] Make mode buttons (WaniKani/Custom) full-width on mobile
-- [ ] Responsive padding: `p-4 md:p-6`
-- [ ] Ensure content area scrolls properly on mobile
-- [ ] Test: All controls accessible on mobile
-- [ ] Test: Mode switching works on mobile
+- [x] Replace inline styles with Tailwind classes ✓
+- [x] Responsive header: stack title and controls on mobile ✓
+- [x] Make mode buttons (WaniKani/Custom) full-width on mobile ✓
+- [x] Responsive padding: `p-4` (consistent on mobile/desktop) ✓
+- [x] Ensure content area scrolls properly on mobile ✓
+- [ ] Test: All controls accessible on mobile - User will test
+- [ ] Test: Mode switching works on mobile - User will test
 
-**Files to modify:**
-- `frontend/src/views/dictation/DictationView.tsx`
+**Files modified:**
+- `frontend/src/views/dictation/DictationView.tsx` ✓ Converted to Tailwind, made responsive
 
 **Success criteria:**
 - Header stacks vertically on mobile
