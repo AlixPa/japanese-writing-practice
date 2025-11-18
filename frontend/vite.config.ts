@@ -6,8 +6,13 @@ import react from "@vitejs/plugin-react";
 
 const env = loadEnv("", process.cwd());
 
-const backendHost = env.BACKEND_HOST || "http://localhost";
-const backendPort = env.BACKEND_PORT || "8080";
+const mergedEnv = {
+  ...env,
+  ...process.env,
+};
+
+const backendHost = mergedEnv.BACKEND_HOST;
+const backendPort = mergedEnv.BACKEND_PORT;
 const backendUrl = `${backendHost}:${backendPort}`;
 
 export default defineConfig({
@@ -18,10 +23,10 @@ export default defineConfig({
     },
   },
   define: {
-    "import.meta.env.GOOGLE_CLIENT_ID": JSON.stringify(env.GOOGLE_CLIENT_ID),
+    "import.meta.env.GOOGLE_CLIENT_ID": JSON.stringify(mergedEnv.GOOGLE_CLIENT_ID),
   },
   server: {
-    port: Number(env.FRONTEND_PORT) || 5173,
+    port: Number(mergedEnv.FRONTEND_PORT),
     proxy: {
       "/api": {
         target: backendUrl,
