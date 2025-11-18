@@ -1,5 +1,7 @@
+from functools import lru_cache
 from typing import Annotated
 
+from cachetools import TTLCache
 from fastapi import Header
 from google.auth.transport import requests
 from google.oauth2 import id_token
@@ -11,10 +13,17 @@ from src.models.database import Users
 base_logger = get_logger()
 
 
+verified_tokens_cache = TTLCache(maxsize=1000, ttl=300)
+
+
 async def get_current_user(
     authorization: Annotated[str | None, Header()] = None,
 ) -> str:
     base_logger.info(f"Got request with {authorization=}")
+
+    if authorization in verified_tokens_cache:
+        return verified_tokens_cache[authorization]
+
     sqlite = SQLiteClient()
 
     if authorization is None:
@@ -28,16 +37,15 @@ async def get_current_user(
         google_sub = id_info["sub"]
         email = id_info.get("email")
 
-        # Insert if not exists
-        sqlite.insert_one(
-            table=Users,
-            to_insert=Users(email=email, google_sub=google_sub),
-            or_ignore=True,
-        )
+        user = sqlite.select(table=Users, cond_equal=dict(google_sub=google_sub))
+        if not user:
+            sqlite.insert_one(
+                table=Users,
+                to_insert=Users(email=email, google_sub=google_sub),
+            )
+            user = sqlite.select(table=Users, cond_equal=dict(google_sub=google_sub))
 
-        user_id = sqlite.select(table=Users, cond_equal=dict(google_sub=google_sub))[
-            0
-        ].id
+        user_id = user[0].id
 
     base_logger.info(f"Continue request for {user_id=}")
     return user_id
