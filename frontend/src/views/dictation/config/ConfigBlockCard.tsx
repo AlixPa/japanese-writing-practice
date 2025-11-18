@@ -47,12 +47,12 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
               >▼</button>
             </div>
           )}
-          <strong className="text-sm md:text-base">{getLabel(block.type)}</strong>
+          <strong className="text-base">{getLabel(block.type)}</strong>
         </div>
         {isEditMode && (
           <button 
             onClick={onRemove}
-            className="px-2 py-1 rounded-lg border border-red-200 bg-red-50 text-red-700 cursor-pointer text-sm font-medium hover:bg-red-100 transition-colors min-h-[32px] flex-shrink-0"
+            className="px-2 py-1 rounded-lg border border-red-200 bg-red-50 text-red-700 cursor-pointer text-base font-medium hover:bg-red-100 transition-colors min-h-[32px] flex-shrink-0"
           >
             Remove
           </button>
@@ -68,16 +68,16 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
               onChange={(value) => onChange({ fullSpeed: value })}
             />
           ) : (
-            <div className="inline-flex items-center gap-1.5 text-sm">
-              <span className="text-gray-500 text-xs md:text-sm">Speed</span>
+            <div className="inline-flex items-center gap-1.5 text-base">
+              <span className="text-gray-500 text-base">Speed</span>
               <span className="text-gray-900 font-medium">{getSpeedLabel(block.fullSpeed ?? 1)}</span>
             </div>
           )
         )}
         {block.type === 'wait' && (
           isEditMode ? (
-            <label className="inline-flex items-center gap-1.5 text-sm">
-              <span className="text-gray-500 text-xs md:text-sm">(seconds)</span>
+            <label className="inline-flex items-center gap-1.5 text-base">
+              <span className="text-gray-500 text-base">(seconds)</span>
               <input
                 type="number"
                 min={0}
@@ -88,12 +88,12 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
                   const num = val === '' ? undefined : Math.max(1, Number(val))
                   onChange({ waitSeconds: num })
                 }}
-                className="w-20 px-1.5 py-1 border border-gray-200 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-20 px-1.5 py-1 border border-gray-200 rounded-md text-base leading-normal focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </label>
           ) : (
-            <div className="inline-flex items-center gap-1.5 text-sm">
-              <span className="text-gray-500 text-xs md:text-sm">(seconds)</span>
+            <div className="inline-flex items-center gap-1.5 text-base">
+              <span className="text-gray-500 text-base">(seconds)</span>
               <span className="text-gray-900 font-medium">{block.waitSeconds ?? 0}</span>
             </div>
           )
@@ -101,9 +101,9 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
         {block.type === 'sentence' && (
           <>
             {isEditMode ? (
-              <label className="inline-flex items-center gap-1.5 text-sm">
-                <span className="text-gray-500 text-xs md:text-sm">Gap</span>
-                <span className="text-gray-500 text-xs md:text-sm">(seconds)</span>
+              <label className="inline-flex items-center gap-1.5 text-base">
+                <span className="text-gray-500 text-base">Gap</span>
+                <span className="text-gray-500 text-base">(seconds)</span>
                 <input
                   type="number"
                   min={0}
@@ -114,13 +114,13 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
                     const num = val === '' ? undefined : Math.max(1, Number(val))
                     onChange({ sentenceGapSeconds: num })
                   }}
-                  className="w-20 px-1.5 py-1 border border-gray-200 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-20 px-1.5 py-1 border border-gray-200 rounded-md text-base leading-normal focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </label>
             ) : (
-              <div className="inline-flex items-center gap-1.5 text-sm">
-                <span className="text-gray-500 text-xs md:text-sm">Gap</span>
-                <span className="text-gray-500 text-xs md:text-sm">(seconds)</span>
+              <div className="inline-flex items-center gap-1.5 text-base">
+                <span className="text-gray-500 text-base">Gap</span>
+                <span className="text-gray-500 text-base">(seconds)</span>
                 <span className="text-gray-900 font-medium">{block.sentenceGapSeconds ?? 0}</span>
               </div>
             )}
@@ -130,14 +130,14 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
                 onChange={(value) => onChange({ sentenceSpeed: value })}
               />
             ) : (
-              <div className="inline-flex items-center gap-1.5 text-sm">
-                <span className="text-gray-500 text-xs md:text-sm">Speed</span>
+              <div className="inline-flex items-center gap-1.5 text-base">
+                <span className="text-gray-500 text-base">Speed</span>
                 <span className="text-gray-900 font-medium">{getSpeedLabel(block.sentenceSpeed ?? 1)}</span>
               </div>
             )}
             {isEditMode ? (
-              <label className="inline-flex items-center gap-1.5 text-sm">
-                <span className="text-gray-500 text-xs md:text-sm">Repeat</span>
+              <label className="inline-flex items-center gap-1.5 text-base">
+                <span className="text-gray-500 text-base">Repeat</span>
                 <input
                   type="number"
                   min={1}
@@ -148,12 +148,12 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
                     const num = val === '' ? undefined : Math.max(1, Number(val))
                     onChange({ repeat: num })
                   }}
-                  className="w-16 px-1.5 py-1 border border-gray-200 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-16 px-1.5 py-1 border border-gray-200 rounded-md text-base leading-normal focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </label>
             ) : (
-              <div className="inline-flex items-center gap-1.5 text-sm">
-                <span className="text-gray-500 text-xs md:text-sm">Repeat</span>
+              <div className="inline-flex items-center gap-1.5 text-base">
+                <span className="text-gray-500 text-base">Repeat</span>
                 <span className="text-gray-900 font-medium">{block.repeat ?? 1}</span>
               </div>
             )}
