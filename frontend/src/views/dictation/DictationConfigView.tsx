@@ -219,12 +219,13 @@ export function DictationConfigView() {
       )}
       <div className="flex flex-col md:flex-row md:items-center gap-3 px-4 md:px-6 pt-2 md:pt-3">
         <div className="flex items-center gap-2 w-full min-w-0">
-          <ConfigSelector 
-            configs={configs as any} 
-            value={selectedId || ''} 
-            onChange={handleSelect}
-            disabled={isEditMode}
-          />
+          {!isEditMode && (
+            <ConfigSelector 
+              configs={configs as any} 
+              value={selectedId || ''} 
+              onChange={handleSelect}
+            />
+          )}
           {!isEditMode && (
             <>
               {selectedId && (
