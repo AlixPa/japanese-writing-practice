@@ -18,10 +18,10 @@ interface Props {
 
 export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlaying, isPaused, progress, currentSubElement, sentenceChunks, onSubElementSelect, selectedSubElementDuration, onPlayPause, currentCycle }: Props) {
   if (!sequence || sequence.length === 0) {
-    return <div style={{ color: '#6b7280' }}>No configuration selected.</div>
+    return <div className="text-gray-500 text-sm">No configuration selected.</div>
   }
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div className="flex flex-col gap-2">
       {sequence.map((step, idx) => {
         const hasWait = Object.prototype.hasOwnProperty.call(step, 'wait')
         const hasSpeed = Object.prototype.hasOwnProperty.call(step, 'speed')
@@ -38,109 +38,98 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
         
         const isActive = activeIndex === idx
         
-        // Simplified styling: active vs inactive
-        const elementStyles = isActive ? {
-          border: isPlaying ? (isPaused ? '2px solid #f59e0b' : '2px solid #3b82f6') : '2px solid #93c5fd',
-          background: isPlaying ? (isPaused ? '#fffbeb' : '#eff6ff') : '#f0f9ff',
-          transform: 'scale(1.01)',
-          boxShadow: isPlaying ? (isPaused ? '0 4px 12px rgba(245, 158, 11, 0.15)' : '0 4px 12px rgba(59, 130, 246, 0.15)') : '0 2px 8px rgba(147, 197, 253, 0.1)',
-          cursor: 'pointer'
-        } : {
-          border: '1px solid #e5e7eb',
-          background: isPlaying ? '#f8fafc' : '#fafafa',
-          transform: 'scale(1)',
-          boxShadow: 'none',
-          cursor: 'pointer'
+        // Build className strings for conditional styling
+        const getElementClasses = () => {
+          if (!isActive) {
+            return `flex flex-col px-2.5 py-2 rounded-lg border border-gray-200 transition-all duration-200 cursor-pointer ${
+              isPlaying ? 'bg-slate-50' : 'bg-gray-50'
+            }`
+          }
+          // Active element
+          if (isPlaying) {
+            if (isPaused) {
+              return 'flex flex-col px-2.5 py-2 rounded-lg border-2 border-amber-500 bg-amber-50 scale-[1.01] transition-all duration-200 cursor-pointer shadow-[0_4px_12px_rgba(245,158,11,0.15)]'
+            }
+            return 'flex flex-col px-2.5 py-2 rounded-lg border-2 border-blue-500 bg-blue-50 scale-[1.01] transition-all duration-200 cursor-pointer shadow-[0_4px_12px_rgba(59,130,246,0.15)]'
+          }
+          return 'flex flex-col px-2.5 py-2 rounded-lg border-2 border-blue-300 bg-blue-50 scale-[1.01] transition-all duration-200 cursor-pointer shadow-[0_2px_8px_rgba(147,197,253,0.1)]'
         }
 
-        const iconStyles = isActive ? {
-          color: isPlaying ? (isPaused ? '#f59e0b' : '#1d4ed8') : '#60a5fa',
-          fontSize: isPlaying ? '16px' : '14px'
-        } : {
-          color: '#6b7280',
-          fontSize: '14px'
+        const getIconClasses = () => {
+          if (!isActive) {
+            return 'text-gray-500 text-sm transition-all duration-200'
+          }
+          if (isPlaying) {
+            if (isPaused) {
+              return 'text-amber-500 text-base transition-all duration-200'
+            }
+            return 'text-blue-700 text-base transition-all duration-200'
+          }
+          return 'text-blue-400 text-sm transition-all duration-200'
         }
 
-        const textStyles = isActive ? {
-          titleColor: isPlaying ? (isPaused ? '#92400e' : '#1e40af') : '#1e40af',
-          subtitleColor: isPlaying ? (isPaused ? '#f59e0b' : '#3b82f6') : '#93c5fd'
-        } : {
-          titleColor: '#111827',
-          subtitleColor: '#6b7280'
+        const getTitleClasses = () => {
+          if (!isActive) {
+            return 'text-gray-900 transition-colors duration-200'
+          }
+          if (isPlaying) {
+            if (isPaused) {
+              return 'text-amber-800 transition-colors duration-200'
+            }
+            return 'text-blue-800 transition-colors duration-200'
+          }
+          return 'text-blue-800 transition-colors duration-200'
+        }
+
+        const getSubtitleClasses = () => {
+          if (!isActive) {
+            return 'text-gray-500 transition-colors duration-200'
+          }
+          if (isPlaying) {
+            if (isPaused) {
+              return 'text-amber-500 transition-colors duration-200'
+            }
+            return 'text-blue-500 transition-colors duration-200'
+          }
+          return 'text-blue-300 transition-colors duration-200'
         }
         
         return (
           <div 
             key={idx} 
             onClick={() => onElementSelect?.(idx)}
-            style={{
-              display: 'flex', 
-              flexDirection: 'column',
-              padding: '8px 10px', 
-              borderRadius: 10,
-              transition: 'all 0.2s ease-in-out',
-              ...elementStyles
-            }}
+            className={getElementClasses()}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
                 {isActive ? (
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       onPlayPause?.()
                     }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: '4px',
-                      borderRadius: '4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.2s ease-in-out'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(0, 0, 0, 0.1)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'none'
-                    }}
+                    className="bg-transparent border-none cursor-pointer p-1 rounded transition-all duration-200 hover:bg-black/10 min-h-[44px] flex items-center justify-center"
                   >
-                    <span style={{ 
-                      ...iconStyles,
-                      fontSize: '16px',
-                      transition: 'all 0.2s ease-in-out'
-                    }}>
+                    <span className={`${getIconClasses()} text-base`}>
                       {isPlaying ? (isPaused ? '▶' : '⏸') : '▶'}
                     </span>
                   </button>
                 ) : (
-                  <span style={{ 
-                    ...iconStyles,
-                    transition: 'all 0.2s ease-in-out'
-                  }}>
+                  <span className={getIconClasses()}>
                     ▰
                   </span>
                 )}
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                  <strong style={{ 
-                    color: textStyles.titleColor,
-                    transition: 'color 0.2s ease-in-out'
-                  }}>{title}</strong>
-                  {subtitle && <span style={{ 
-                    color: textStyles.subtitleColor,
-                    transition: 'color 0.2s ease-in-out'
-                  }}>{subtitle}</span>}
+                <div className="flex items-baseline gap-2">
+                  <strong className={getTitleClasses()}>{title}</strong>
+                  {subtitle && <span className={`${getSubtitleClasses()} text-xs md:text-sm`}>{subtitle}</span>}
                 </div>
               </div>
-              <div style={{ width: 24 }} />
+              <div className="w-6" />
             </div>
             
             {/* Progress bar for main elements when active */}
             {isActive && !(hasWait && hasSpeed) && (
-              <div style={{ marginTop: 8 }}>
+              <div className="mt-2">
                 <ProgressBar 
                   current={progress ? progress.current : 0} 
                   total={progress ? progress.total : (selectedSubElementDuration || 1000)} 
@@ -151,8 +140,8 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
             
             {/* Sub-elements for sentence-by-sentence blocks */}
             {isActive && hasWait && hasSpeed && (
-              <div style={{ marginTop: 8, padding: '8px', background: 'rgba(0, 0, 0, 0.02)', borderRadius: 6 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div className="mt-2 p-2 bg-black/5 rounded-md">
+                <div className="flex flex-col gap-1">
                   {sentenceChunks && sentenceChunks.length > 0 ? sentenceChunks.map((_, chunkIndex) => {
                     const isCurrentAudio = currentSubElement?.type === 'audio' && currentSubElement.index === chunkIndex
                     const isCurrentGap = currentSubElement?.type === 'gap' && currentSubElement.index === chunkIndex
@@ -160,40 +149,26 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
                     const isSubElementActive = isCurrentAudio || isCurrentGap
                     
                     return (
-                      <div key={chunkIndex} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <div key={chunkIndex} className="flex flex-col gap-1">
                         {/* Grouped sub-element container */}
                         <div 
                           onClick={(e) => {
                             e.stopPropagation()
                             onSubElementSelect?.('audio', chunkIndex) // Always start from audio
                           }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8,
-                            padding: '6px 8px',
-                            borderRadius: 6,
-                            background: isSubElementActive ? (isSubElementPaused ? '#fffbeb' : '#eff6ff') : '#f9fafb',
-                            border: isSubElementActive ? (isSubElementPaused ? '1px solid #f59e0b' : '1px solid #3b82f6') : '1px solid #e5e7eb',
-                            fontSize: '11px',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease-in-out'
-                          }}
+                          className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-[11px] cursor-pointer transition-all duration-200 ${
+                            isSubElementActive 
+                              ? (isSubElementPaused 
+                                  ? 'bg-amber-50 border border-amber-500' 
+                                  : 'bg-blue-50 border border-blue-500')
+                              : 'bg-gray-50 border border-gray-200'
+                          }`}
                         >
                           {/* Cycle counter - show for active chunk or when playing */}
                           {(isSubElementActive || (currentCycle && currentCycle.chunkIndex === chunkIndex)) && (
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              minWidth: '32px',
-                              height: '20px',
-                              background: isSubElementPaused ? '#f59e0b' : '#3b82f6',
-                              color: 'white',
-                              borderRadius: '10px',
-                              fontSize: '10px',
-                              fontWeight: 'bold'
-                            }}>
+                            <div className={`flex items-center justify-center min-w-[32px] h-5 rounded-full text-[10px] font-bold text-white ${
+                              isSubElementPaused ? 'bg-amber-500' : 'bg-blue-500'
+                            }`}>
                               {currentCycle && currentCycle.chunkIndex === chunkIndex 
                                 ? `${currentCycle.cycle} / ${currentCycle.totalCycles}`
                                 : `1 / ${step.repeat ?? 1}`
@@ -202,57 +177,60 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
                           )}
                           
                           {/* Content container */}
-                          <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 2,
-                            flex: 1
-                          }}>
-                          {/* Audio chunk (visual only) */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            padding: '2px 4px',
-                            borderRadius: 3,
-                            background: isCurrentAudio ? (isSubElementPaused ? '#fef3c7' : '#dbeafe') : 'transparent',
-                            transition: 'all 0.2s ease-in-out'
-                          }}>
-                            <span style={{ color: isCurrentAudio ? (isSubElementPaused ? '#f59e0b' : '#1d4ed8') : '#6b7280' }}>
-                              ▰
-                            </span>
-                            <span style={{ color: isCurrentAudio ? (isSubElementPaused ? '#92400e' : '#1e40af') : '#374151' }}>
-                              Audio chunk {chunkIndex + 1}
-                            </span>
-                            {isCurrentAudio && (
-                              <div style={{ flex: 1, marginLeft: 8 }}>
-                                <ProgressBar 
-                                  current={isPlaying && progress ? progress.current : 0} 
-                                  total={isPlaying && progress ? progress.total : (selectedSubElementDuration || 1000)} 
-                                  isPaused={isPaused} 
-                                />
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Gap (visual only) */}
-                          <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 6,
-                              padding: '2px 4px',
-                              borderRadius: 3,
-                              background: isCurrentGap ? (isSubElementPaused ? '#fef3c7' : '#dbeafe') : 'transparent',
-                              transition: 'all 0.2s ease-in-out'
-                            }}>
-                              <span style={{ color: isCurrentGap ? (isSubElementPaused ? '#f59e0b' : '#1d4ed8') : '#6b7280' }}>
+                          <div className="flex flex-col gap-0.5 flex-1">
+                            {/* Audio chunk (visual only) */}
+                            <div className={`flex items-center gap-1.5 px-1 py-0.5 rounded-sm transition-all duration-200 ${
+                              isCurrentAudio 
+                                ? (isSubElementPaused ? 'bg-amber-100' : 'bg-blue-100')
+                                : 'bg-transparent'
+                            }`}>
+                              <span className={
+                                isCurrentAudio 
+                                  ? (isSubElementPaused ? 'text-amber-500' : 'text-blue-700')
+                                  : 'text-gray-500'
+                              }>
                                 ▰
                               </span>
-                              <span style={{ color: isCurrentGap ? (isSubElementPaused ? '#92400e' : '#1e40af') : '#374151' }}>
+                              <span className={
+                                isCurrentAudio 
+                                  ? (isSubElementPaused ? 'text-amber-800' : 'text-blue-800')
+                                  : 'text-gray-700'
+                              }>
+                                Audio chunk {chunkIndex + 1}
+                              </span>
+                              {isCurrentAudio && (
+                                <div className="flex-1 ml-2">
+                                  <ProgressBar 
+                                    current={isPlaying && progress ? progress.current : 0} 
+                                    total={isPlaying && progress ? progress.total : (selectedSubElementDuration || 1000)} 
+                                    isPaused={isPaused} 
+                                  />
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Gap (visual only) */}
+                            <div className={`flex items-center gap-1.5 px-1 py-0.5 rounded-sm transition-all duration-200 ${
+                              isCurrentGap 
+                                ? (isSubElementPaused ? 'bg-amber-100' : 'bg-blue-100')
+                                : 'bg-transparent'
+                            }`}>
+                              <span className={
+                                isCurrentGap 
+                                  ? (isSubElementPaused ? 'text-amber-500' : 'text-blue-700')
+                                  : 'text-gray-500'
+                              }>
+                                ▰
+                              </span>
+                              <span className={
+                                isCurrentGap 
+                                  ? (isSubElementPaused ? 'text-amber-800' : 'text-blue-800')
+                                  : 'text-gray-700'
+                              }>
                                 Gap {step.wait}s
                               </span>
                               {isCurrentGap && (
-                                <div style={{ flex: 1, marginLeft: 8 }}>
+                                <div className="flex-1 ml-2">
                                   <ProgressBar 
                                     current={isPlaying && currentSubElement?.progress ? currentSubElement.progress.current : 0} 
                                     total={isPlaying && currentSubElement?.progress ? currentSubElement.progress.total : (selectedSubElementDuration || 1000)} 
@@ -266,13 +244,7 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
                       </div>
                     )
                   }) : (
-                    <div style={{ 
-                      padding: '8px', 
-                      textAlign: 'center', 
-                      color: '#6b7280', 
-                      fontSize: '12px',
-                      fontStyle: 'italic'
-                    }}>
+                    <div className="p-2 text-center text-gray-500 text-xs italic">
                       Loading sub-elements...
                     </div>
                   )}
@@ -286,5 +258,3 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
     </div>
   )
 }
-
-

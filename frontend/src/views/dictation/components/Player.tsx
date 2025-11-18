@@ -742,10 +742,10 @@ export function Player({
   }
 
   return (
-    <div style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: 12, background: 'white' }}>
+    <div className="border border-gray-200 rounded-xl p-3 md:p-4 bg-white">
       {playError && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <span style={{ color: '#991b1b' }}>{playError}</span>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-red-800 text-sm">{playError}</span>
         </div>
       )}
       <PlayerSequence 
