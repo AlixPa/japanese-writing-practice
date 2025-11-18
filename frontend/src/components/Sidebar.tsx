@@ -32,65 +32,27 @@ export function Sidebar() {
   }, [token, navigate, location.pathname])
 
   return (
-    <aside style={{
-      width: 200,
-      borderRight: '1px solid #e5e7eb',
-      padding: 12,
-      boxSizing: 'border-box',
-      background: '#f9fafb',
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh'
-    }}>
-      <div style={{
-        paddingBottom: 16,
-        borderBottom: '1px solid #e5e7eb',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-        marginBottom: 16
-      }}>
+    <aside className="hidden md:flex w-[200px] border-r border-gray-200 p-3 box-border bg-gray-50 flex-col h-screen">
+      <div className="pb-4 border-b border-gray-200 flex flex-col gap-2 mb-4">
         {isAuthenticated ? (
           <>
             {userInfo?.email && (
-              <div style={{
-                padding: '8px 10px',
-                fontSize: 12,
-                color: '#111827',
-                textAlign: 'center',
-                fontWeight: 500,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}>
+              <div className="px-2.5 py-2 text-xs text-gray-900 text-center font-medium overflow-hidden text-ellipsis whitespace-nowrap">
                 {userInfo.email}
               </div>
             )}
-            <div style={{
-              padding: '4px 10px',
-              fontSize: 11,
-              color: '#6b7280',
-              textAlign: 'center'
-            }}>
+            <div className="px-2.5 py-1 text-xs text-gray-500 text-center">
               Signed in
             </div>
             <button
               onClick={logout}
-              style={{
-                padding: '8px 10px',
-                borderRadius: 8,
-                border: '1px solid #e5e7eb',
-                background: 'white',
-                color: '#111827',
-                cursor: 'pointer',
-                fontSize: 14
-              }}
+              className="px-2.5 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 cursor-pointer text-sm hover:bg-gray-50 transition-colors min-h-[44px]"
             >
               Sign out
             </button>
           </>
         ) : (
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="flex justify-center">
             <GoogleLogin
               onSuccess={(credentialResponse) => {
                 handleCredentialResponse(credentialResponse)
@@ -104,24 +66,18 @@ export function Sidebar() {
         )}
       </div>
 
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+      <nav className="flex flex-col gap-2 flex-1">
         {menuItems.map(item => {
           const isActive = location.pathname === item.path
           return (
             <NavLink
               key={item.path}
               to={item.path}
-              style={{
-                textAlign: 'left',
-                padding: '8px 10px',
-                borderRadius: 8,
-                border: '1px solid ' + (isActive ? '#3b82f6' : '#e5e7eb'),
-                background: isActive ? '#eff6ff' : 'white',
-                color: isActive ? '#1d4ed8' : '#111827',
-                cursor: 'pointer',
-                textDecoration: 'none',
-                display: 'block'
-              }}
+              className={`text-left px-2.5 py-2 rounded-lg border min-h-[44px] flex items-center transition-colors ${
+                isActive
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-200 bg-white text-gray-900 hover:bg-gray-50'
+              }`}
             >
               {item.label}
             </NavLink>

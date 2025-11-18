@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Sidebar } from './components/Sidebar'
+import { MobileNav } from './components/MobileNav'
 import { WelcomeView } from './views/WelcomeView'
 import { DictationView } from './views/dictation/DictationView'
 import { DictationConfigView } from './views/dictation/DictationConfigView'
@@ -10,10 +11,14 @@ export function App() {
 
   return (
     <BrowserRouter>
-      <div style={{ display: 'flex', height: '100vh', fontFamily: baseFont }}>
+      <div 
+        className="flex h-screen"
+        style={{ fontFamily: baseFont }}
+      >
+        <MobileNav />
         <Sidebar />
 
-        <main style={{ flex: 1, padding: 24, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+        <main className="flex-1 p-4 md:p-6 box-border flex flex-col">
           <Routes>
             <Route path="/" element={<WelcomeView />} />
             <Route path="/dictation" element={<DictationView />} />
