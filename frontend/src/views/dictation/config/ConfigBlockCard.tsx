@@ -88,7 +88,7 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
                   const num = val === '' ? undefined : Math.max(1, Number(val))
                   onChange({ waitSeconds: num })
                 }}
-                className="w-20 px-1.5 py-1 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-20 px-1.5 py-1 border border-gray-200 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </label>
           ) : (
@@ -114,7 +114,7 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
                     const num = val === '' ? undefined : Math.max(1, Number(val))
                     onChange({ sentenceGapSeconds: num })
                   }}
-                  className="w-20 px-1.5 py-1 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-20 px-1.5 py-1 border border-gray-200 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </label>
             ) : (
@@ -148,7 +148,7 @@ export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDow
                     const num = val === '' ? undefined : Math.max(1, Number(val))
                     onChange({ repeat: num })
                   }}
-                  className="w-16 px-1.5 py-1 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-16 px-1.5 py-1 border border-gray-200 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </label>
             ) : (

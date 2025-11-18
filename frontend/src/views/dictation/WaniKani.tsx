@@ -99,7 +99,7 @@ export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: stri
                 setRevealed(false)
               }
             }}
-            className="w-20 px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-20 px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-center text-base font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
           <button
             type="button"
