@@ -84,6 +84,8 @@ class SQLiteClient(ABC):
 
         for col, ls_val in cond_in.items():
             if len(ls_val) == 0:
+                # No values in the in -> no match
+                conds.append("AND 1 = 0")
                 continue
             conds.append(f"AND {col} IN (" + ",".join(["?"] * len(ls_val)) + ")")
             args.extend(ls_val)

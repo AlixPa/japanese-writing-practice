@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { api, StoryResponse } from '@/api/client'
-import { RangeSlider } from '@/components/RangeSlider'
 import { Player } from './components/Player'
 import { StoryBlock } from './components/StoryBlock'
 import { useConfigById } from '@/hooks/useConfigById'
 
 export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: string }) {
   const [level, setLevel] = useState<number>(1)
+  const [levelInput, setLevelInput] = useState<string>('1')
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [stories, setStories] = useState<StoryResponse[]>([])
@@ -46,46 +46,79 @@ export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: stri
     return () => { cancelled = true; ctrl.abort(); clearTimeout(timeout) }
   }, [level])
 
+  // Sync levelInput with level when level changes externally (e.g., from buttons)
+  useEffect(() => {
+    setLevelInput(level.toString())
+  }, [level])
+
 
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <label style={{ color: '#6b7280', minWidth: 40 }}>Level</label>
-        <RangeSlider
-          min={1}
-          max={60}
-          step={1}
-          value={level}
-          onChange={(e) => { setLevel(Number(e.target.value)); setRevealed(false) }}
-          style={{ flex: 1 }}
-        />
-        <input
-          type="number"
-          min={1}
-          max={60}
-          value={level}
-          onChange={(e) => {
-            const newLevel = Math.max(1, Math.min(60, Number(e.target.value) || 1))
-            setLevel(newLevel)
-            setRevealed(false)
-          }}
-          style={{
-            width: 60,
-            padding: '4px 8px',
-            borderRadius: 8,
-            border: '1px solid #c7d2fe',
-            background: '#eef2ff',
-            color: '#1d4ed8',
-            textAlign: 'center',
-            fontSize: '14px'
-          }}
-        />
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+        <label className="text-gray-500 text-sm md:min-w-[40px]">Level</label>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              const newLevel = Math.max(1, level - 1)
+              setLevel(newLevel)
+              setRevealed(false)
+            }}
+            disabled={level <= 1}
+            className="w-10 h-10 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold text-lg flex items-center justify-center hover:bg-indigo-100 active:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            aria-label="Decrease level"
+          >
+            −
+          </button>
+          <input
+            type="number"
+            min={1}
+            max={60}
+            value={levelInput}
+            onChange={(e) => {
+              const value = e.target.value
+              setLevelInput(value) // Allow empty for typing
+              if (value !== '' && !isNaN(Number(value))) {
+                const num = Number(value)
+                const newLevel = Math.max(1, Math.min(60, num))
+                setLevel(newLevel)
+                setRevealed(false)
+              }
+            }}
+            onBlur={() => {
+              // Validate on blur - if empty or invalid, reset to current level
+              const num = Number(levelInput)
+              if (levelInput === '' || isNaN(num)) {
+                setLevelInput(level.toString())
+              } else {
+                const newLevel = Math.max(1, Math.min(60, num))
+                setLevel(newLevel)
+                setLevelInput(newLevel.toString())
+                setRevealed(false)
+              }
+            }}
+            className="w-20 px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const newLevel = Math.min(60, level + 1)
+              setLevel(newLevel)
+              setRevealed(false)
+            }}
+            disabled={level >= 60}
+            className="w-10 h-10 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold text-lg flex items-center justify-center hover:bg-indigo-100 active:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            aria-label="Increase level"
+          >
+            +
+          </button>
+        </div>
       </div>
 
       {stories.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <label style={{ color: '#6b7280', minWidth: 60 }}>Story</label>
+        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+          <label className="text-gray-500 text-sm md:min-w-[60px]">Story</label>
           <select
             value={selectedStory?.story_id || ''}
             onChange={(e) => {
@@ -93,15 +126,7 @@ export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: stri
               setSelectedStory(story || null)
               setRevealed(false)
             }}
-            style={{
-              flex: 1,
-              padding: '8px 12px',
-              borderRadius: 8,
-              border: '1px solid #e5e7eb',
-              background: 'white',
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}
+            className="flex-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm cursor-pointer min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             {stories.map((story) => (
               <option key={story.story_id} value={story.story_id}>
@@ -113,14 +138,7 @@ export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: stri
       )}
 
       {stories.length === 0 && !loading && !error ? (
-        <div style={{ 
-          border: '1px solid #e5e7eb', 
-          borderRadius: 12, 
-          padding: 24, 
-          background: 'white',
-          textAlign: 'center',
-          color: '#6b7280'
-        }}>
+        <div className="border border-gray-200 rounded-xl p-6 bg-white text-center text-gray-500">
           No story available for this level
         </div>
       ) : (
