@@ -86,3 +86,4 @@ jobs:
               -e USES_LOCAL_FILES=False \
               -e SYNC_DB_S3=True \
               $ECR_REGISTRY/alixparadis/japanese-writing-practice:jwp-app-latest
+            docker system prune -a --volumes -f
