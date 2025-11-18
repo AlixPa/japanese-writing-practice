@@ -40,19 +40,21 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
         
         // Build className strings for conditional styling
         const getElementClasses = () => {
+          // Same padding for active and inactive
+          const baseClasses = 'flex flex-col px-2.5 py-2 rounded-lg transition-all duration-200 cursor-pointer'
           if (!isActive) {
-            return `flex flex-col px-2.5 py-2 rounded-lg border border-gray-200 transition-all duration-200 cursor-pointer ${
+            return `${baseClasses} border border-gray-200 ${
               isPlaying ? 'bg-slate-50' : 'bg-gray-50'
             }`
           }
           // Active element
           if (isPlaying) {
             if (isPaused) {
-              return 'flex flex-col px-2.5 py-2 rounded-lg border-2 border-amber-500 bg-amber-50 scale-[1.01] transition-all duration-200 cursor-pointer shadow-[0_4px_12px_rgba(245,158,11,0.15)]'
+              return `${baseClasses} border-2 border-amber-500 bg-amber-50 shadow-[0_4px_12px_rgba(245,158,11,0.15)]`
             }
-            return 'flex flex-col px-2.5 py-2 rounded-lg border-2 border-blue-500 bg-blue-50 scale-[1.01] transition-all duration-200 cursor-pointer shadow-[0_4px_12px_rgba(59,130,246,0.15)]'
+            return `${baseClasses} border-2 border-blue-500 bg-blue-50 shadow-[0_4px_12px_rgba(59,130,246,0.15)]`
           }
-          return 'flex flex-col px-2.5 py-2 rounded-lg border-2 border-blue-300 bg-blue-50 scale-[1.01] transition-all duration-200 cursor-pointer shadow-[0_2px_8px_rgba(147,197,253,0.1)]'
+          return `${baseClasses} border-2 border-blue-300 bg-blue-50 shadow-[0_2px_8px_rgba(147,197,253,0.1)]`
         }
 
         const getIconClasses = () => {
@@ -108,14 +110,14 @@ export function PlayerSequence({ sequence, activeIndex, onElementSelect, isPlayi
                       e.stopPropagation()
                       onPlayPause?.()
                     }}
-                    className="bg-transparent border-none cursor-pointer p-1 rounded transition-all duration-200 hover:bg-black/10 min-h-[44px] flex items-center justify-center"
+                    className="bg-transparent border-none cursor-pointer w-8 h-8 rounded transition-all duration-200 hover:bg-black/10 flex items-center justify-center flex-shrink-0"
                   >
                     <span className={`${getIconClasses()} text-base`}>
                       {isPlaying ? (isPaused ? '▶' : '⏸') : '▶'}
                     </span>
                   </button>
                 ) : (
-                  <span className={getIconClasses()}>
+                  <span className={`${getIconClasses()} w-8 h-8 flex items-center justify-center flex-shrink-0`}>
                     ▰
                   </span>
                 )}
