@@ -18,7 +18,7 @@ export function App() {
         <MobileNav />
         <Sidebar />
 
-        <main className="flex-1 p-4 pt-16 md:pt-6 md:p-6 box-border flex flex-col">
+        <main className="flex-1 pt-14 md:pt-0 box-border flex flex-col">
           <Routes>
             <Route path="/" element={<WelcomeView />} />
             <Route path="/dictation" element={<DictationView />} />

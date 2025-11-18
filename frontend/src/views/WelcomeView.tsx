@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 export function WelcomeView() {
   const navigate = useNavigate()
   return (
-    <div className="p-4 md:p-6 max-w-full md:max-w-2xl mx-auto flex flex-col gap-6 md:gap-6">
+    <div className="p-4 md:p-6 max-w-full md:max-w-2xl mx-auto flex flex-col gap-6 md:gap-6 h-full overflow-auto">
       {/* Header */}
       <div className="text-center mb-4">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">

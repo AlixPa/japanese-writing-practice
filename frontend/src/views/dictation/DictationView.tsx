@@ -14,13 +14,13 @@ export function DictationView() {
 
   return (
     <section className="flex flex-col gap-3 h-full">
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-3 flex-wrap px-4 md:px-6 pt-2 md:pt-3">
         <h1 className="m-0 text-xl md:text-2xl font-semibold text-gray-900">Dictation</h1>
         <div className="flex items-center gap-2">
           <ConfigSelector configs={configs} value={selectedConfigId} onChange={setSelectedConfigId} />
         </div>
       </div>
-      <div className="flex-1 flex flex-col border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+      <div className="flex-1 flex flex-col border-t border-gray-200 overflow-hidden bg-white">
         <div className="grid grid-cols-2">
           <button
             onClick={() => setDictationMode('wanikani')}
