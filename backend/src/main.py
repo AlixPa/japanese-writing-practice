@@ -4,8 +4,6 @@ from asgi_correlation_id.middleware import CorrelationIdMiddleware, is_valid_uui
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request as StarletteRequest
 
 # from fastapi.middleware.cors import CORSMiddleware
 from .api import api_router
