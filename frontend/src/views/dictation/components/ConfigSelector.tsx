@@ -5,9 +5,10 @@ interface Props {
   configs: ApiConfig[]
   value: string
   onChange: (id: string) => void
+  disabled?: boolean
 }
 
-export function ConfigSelector({ configs, value, onChange }: Props) {
+export function ConfigSelector({ configs, value, onChange, disabled = false }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -39,15 +40,18 @@ export function ConfigSelector({ configs, value, onChange }: Props) {
   }
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0 flex-1 md:flex-initial">
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-900 cursor-pointer text-sm font-medium min-h-[44px] shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flex items-center gap-2"
+        disabled={disabled}
+        className="w-full min-w-0 px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-900 cursor-pointer text-sm font-medium min-h-[44px] shadow-sm hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <span>{selectedConfig?.name || 'Select configuration'}</span>
+        <span className="min-w-0 flex-1 overflow-hidden">
+          <span className="block truncate text-left">{selectedConfig?.name || 'Select configuration'}</span>
+        </span>
         <svg
-          className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-gray-500 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -62,10 +66,10 @@ export function ConfigSelector({ configs, value, onChange }: Props) {
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-auto"
+          className="absolute top-full left-0 mt-1 min-w-full w-auto bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-auto"
         >
           {configs.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-gray-500">No configurations</div>
+            <div className="px-3 py-2 text-sm text-gray-500 whitespace-nowrap">No configurations</div>
           ) : (
             configs.map((config) => (
               <button
@@ -79,7 +83,7 @@ export function ConfigSelector({ configs, value, onChange }: Props) {
               >
                 {config.id === value && (
                   <svg
-                    className="w-4 h-4 text-blue-700"
+                    className="w-4 h-4 text-blue-700 flex-shrink-0"
                     fill="none"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -90,7 +94,7 @@ export function ConfigSelector({ configs, value, onChange }: Props) {
                     <path d="M5 13l4 4L19 7" />
                   </svg>
                 )}
-                <span className={config.id === value ? '' : 'ml-6'}>{config.name}</span>
+                <span className={`${config.id === value ? '' : 'ml-6'} whitespace-nowrap`}>{config.name}</span>
               </button>
             ))
           )}

@@ -6,33 +6,24 @@ interface SpeedSelectorProps {
   onChange: (value: number) => void
   label?: string
   style?: React.CSSProperties
+  disabled?: boolean
 }
 
 export function SpeedSelector({ 
   value, 
   onChange, 
   label = "Speed",
-  style 
+  style,
+  disabled = false
 }: SpeedSelectorProps) {
   return (
-    <label style={{ 
-      display: 'inline-flex', 
-      alignItems: 'center', 
-      gap: 6, 
-      marginLeft: 8,
-      ...style 
-    }}>
-      <span style={{ color: '#6b7280' }}>{label}</span>
+    <label className="inline-flex items-center gap-1.5 text-sm" style={style}>
+      <span className="text-gray-500 text-xs md:text-sm">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        style={{
-          padding: '4px 6px',
-          border: '1px solid #e5e7eb',
-          borderRadius: 6,
-          background: 'white',
-          cursor: 'pointer'
-        }}
+        disabled={disabled}
+        className="px-1.5 py-1 border border-gray-200 rounded-md bg-white cursor-pointer text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {SPEED_OPTIONS.map(option => (
           <option key={option.value} value={option.value}>

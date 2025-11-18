@@ -9,6 +9,7 @@ function generateId() {
 interface Props {
   blocks: DictationBlock[]
   onBlocksChange: (blocks: DictationBlock[]) => void
+  isEditMode?: boolean
 }
 
 const blockTypes: { type: DictationBlockType; label: string }[] = [
@@ -17,7 +18,7 @@ const blockTypes: { type: DictationBlockType; label: string }[] = [
   { type: 'wait', label: 'Wait' },
 ]
 
-export function ConfigEditor({ blocks, onBlocksChange }: Props) {
+export function ConfigEditor({ blocks, onBlocksChange, isEditMode = false }: Props) {
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null)
   const menuRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
@@ -105,8 +106,8 @@ export function ConfigEditor({ blocks, onBlocksChange }: Props) {
       <div className="font-semibold text-gray-900 mb-3 text-sm">Sequence</div>
       <div className="flex-1 overflow-auto">
         <div className="flex flex-col gap-2">
-          {/* Add button at the start */}
-          <AddButton index={0} />
+          {/* Add button at the start - only in edit mode */}
+          {isEditMode && <AddButton index={0} />}
           
           {blocks.map((block, index) => (
             <React.Fragment key={block.id}>
@@ -130,15 +131,21 @@ export function ConfigEditor({ blocks, onBlocksChange }: Props) {
                   copy.splice(idx + 1, 0, m)
                   onBlocksChange(copy)
                 }}
+                isEditMode={isEditMode}
               />
-              {/* Add button after each block */}
-              <AddButton index={index + 1} />
+              {/* Add button after each block - only in edit mode */}
+              {isEditMode && <AddButton index={index + 1} />}
             </React.Fragment>
           ))}
           
-          {blocks.length === 0 && (
+          {blocks.length === 0 && isEditMode && (
             <div className="text-center text-gray-400 text-sm py-8">
               Click the + button above to add your first block
+            </div>
+          )}
+          {blocks.length === 0 && !isEditMode && (
+            <div className="text-center text-gray-400 text-sm py-8">
+              No blocks in this configuration
             </div>
           )}
         </div>

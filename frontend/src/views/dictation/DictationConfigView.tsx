@@ -54,6 +54,7 @@ export function DictationConfigView() {
   const [blocks, setBlocks] = useState<DictationBlock[]>([])
   const [toast, setToast] = useState<{ message: string; kind: 'success' | 'error' } | null>(null)
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false)
+  const [isEditMode, setIsEditMode] = useState<boolean>(false)
   const selectedConfig = useMemo(() => configs.find(c => c.id === selectedId) || null, [configs, selectedId])
   
   // Create authenticated API instance
@@ -83,6 +84,7 @@ export function DictationConfigView() {
     setSelectedId(null)
     setNameDraft('')
     setBlocks([])
+    setIsEditMode(true)
   }
 
   const handleSelect = (id: string) => {
@@ -92,6 +94,23 @@ export function DictationConfigView() {
       setNameDraft(cfg.name)
       setBlocks(toBlocks(cfg.sequence))
     }
+    setIsEditMode(false) // Exit edit mode when selecting a config
+  }
+
+  const handleEdit = () => {
+    setIsEditMode(true)
+  }
+
+  const handleCancel = () => {
+    // Reload the selected config to reset any changes
+    if (selectedId) {
+      const cfg = configs.find(c => c.id === selectedId)
+      if (cfg) {
+        setNameDraft(cfg.name)
+        setBlocks(toBlocks(cfg.sequence))
+      }
+    }
+    setIsEditMode(false)
   }
 
   const handleSave = async () => {
@@ -132,6 +151,7 @@ export function DictationConfigView() {
     }
     setToast({ message: 'Saved successfully', kind: 'success' })
     setTimeout(() => setToast(null), 2000)
+    setIsEditMode(false) // Exit edit mode after saving
   }
 
   const handleDelete = async () => {
@@ -198,46 +218,66 @@ export function DictationConfigView() {
         </div>
       )}
       <div className="flex flex-col md:flex-row md:items-center gap-3 px-4 md:px-6 pt-2 md:pt-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <ConfigSelector configs={configs as any} value={selectedId || ''} onChange={handleSelect} />
-          <button 
-            onClick={() => {
-              const name = prompt('Enter configuration name:')
-              if (name && name.trim()) {
-                setNewConfig()
-                setNameDraft(name.trim())
-              }
-            }}
-            className="px-3 py-2 rounded-lg border border-green-200 bg-green-50 text-green-700 cursor-pointer text-base font-bold min-h-[44px] hover:bg-green-100 transition-colors"
-            title="Create new configuration"
-          >
-            +
-          </button>
-          <input
-            placeholder="Name"
-            value={nameDraft}
-            onChange={(e) => setNameDraft(e.target.value)}
-            className="px-3 py-2 border border-gray-200 rounded-lg min-h-[44px] w-full md:w-auto md:min-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        <div className="flex items-center gap-2 w-full min-w-0">
+          <ConfigSelector 
+            configs={configs as any} 
+            value={selectedId || ''} 
+            onChange={handleSelect}
+            disabled={isEditMode}
           />
-          <button 
-            onClick={handleSave} 
-            className="px-3 py-2 rounded-lg border border-green-200 bg-green-50 text-green-700 cursor-pointer min-h-[44px] hover:bg-green-100 transition-colors"
-          >
-            Save
-          </button>
-          {selectedId && (
-            <button 
-              onClick={handleDelete} 
-              className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 cursor-pointer min-h-[44px] hover:bg-red-100 transition-colors"
-            >
-              Delete
-            </button>
+          {!isEditMode && (
+            <>
+              {selectedId && (
+                <button 
+                  onClick={handleEdit}
+                  className="px-3 py-2 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 cursor-pointer text-sm font-medium min-h-[44px] hover:bg-blue-100 transition-colors flex-shrink-0"
+                >
+                  Edit
+                </button>
+              )}
+              <button 
+                onClick={setNewConfig}
+                className="px-3 py-2 rounded-lg border border-green-200 bg-green-50 text-green-700 cursor-pointer text-sm font-medium min-h-[44px] hover:bg-green-100 transition-colors flex-shrink-0"
+              >
+                New
+              </button>
+            </>
+          )}
+          {isEditMode && (
+            <>
+              <input
+                placeholder="Configuration name"
+                value={nameDraft}
+                onChange={(e) => setNameDraft(e.target.value)}
+                className="px-3 py-2 border border-gray-200 rounded-lg min-h-[44px] w-full md:w-auto md:min-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <button 
+                onClick={handleSave} 
+                className="px-3 py-2 rounded-lg border border-green-200 bg-green-50 text-green-700 cursor-pointer text-sm font-medium min-h-[44px] hover:bg-green-100 transition-colors"
+              >
+                Save
+              </button>
+              <button 
+                onClick={handleCancel} 
+                className="px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 cursor-pointer text-sm font-medium min-h-[44px] hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              {selectedId && (
+                <button 
+                  onClick={handleDelete} 
+                  className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-700 cursor-pointer text-sm font-medium min-h-[44px] hover:bg-red-100 transition-colors"
+                >
+                  Delete
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
       <div className="flex-1 flex flex-col border-t border-gray-200 overflow-hidden bg-white">
         <div className="p-4 h-full overflow-auto">
-          <ConfigEditor blocks={blocks} onBlocksChange={setBlocks} />
+          <ConfigEditor blocks={blocks} onBlocksChange={setBlocks} isEditMode={isEditMode} />
         </div>
       </div>
     </section>

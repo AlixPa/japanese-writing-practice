@@ -1,6 +1,7 @@
 import React from 'react'
 import type { DictationBlock } from './types'
 import { SpeedSelector } from '@/components/SpeedSelector'
+import { getSpeedLabel } from '@/constants/speedOptions'
 
 interface Props {
   block: DictationBlock
@@ -8,6 +9,7 @@ interface Props {
   onChange: (changes: Partial<DictationBlock>) => void
   onMoveUp: () => void
   onMoveDown: () => void
+  isEditMode?: boolean
 }
 
 function getLabel(type: DictationBlock['type']) {
@@ -23,144 +25,141 @@ function getLabel(type: DictationBlock['type']) {
   }
 }
 
-export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDown }: Props) {
+export function ConfigBlockCard({ block, onRemove, onChange, onMoveUp, onMoveDown, isEditMode = false }: Props) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '6px 8px',
-        border: '1px solid #e5e7eb',
-        borderRadius: 10,
-        background: 'white',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <span
-            title="Move up"
-            onClick={onMoveUp}
-            style={{
-              width: 16,
-              height: 16,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 4,
-              color: '#6b7280',
-              cursor: 'pointer',
-              userSelect: 'none',
-              fontSize: 10,
-              lineHeight: '10px'
-            }}
-          >▲</span>
-          <span
-            title="Move down"
-            onClick={onMoveDown}
-            style={{
-              width: 16,
-              height: 16,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 4,
-              color: '#6b7280',
-              cursor: 'pointer',
-              userSelect: 'none',
-              fontSize: 10,
-              lineHeight: '10px'
-            }}
-          >▼</span>
+    <div className="flex flex-col gap-2 p-2 md:p-1.5 border border-gray-200 rounded-lg bg-white shadow-sm">
+      {/* First row: Move buttons + Type label + Remove button */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {isEditMode && (
+            <div className="flex flex-col gap-0.5">
+              <button
+                type="button"
+                title="Move up"
+                onClick={onMoveUp}
+                className="w-4 h-4 flex items-center justify-center rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 cursor-pointer text-[10px] leading-[10px] select-none"
+              >▲</button>
+              <button
+                type="button"
+                title="Move down"
+                onClick={onMoveDown}
+                className="w-4 h-4 flex items-center justify-center rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 cursor-pointer text-[10px] leading-[10px] select-none"
+              >▼</button>
+            </div>
+          )}
+          <strong className="text-sm md:text-base">{getLabel(block.type)}</strong>
         </div>
-        <strong>{getLabel(block.type)}</strong>
+        {isEditMode && (
+          <button 
+            onClick={onRemove}
+            className="px-2 py-1 rounded-lg border border-red-200 bg-red-50 text-red-700 cursor-pointer text-sm font-medium hover:bg-red-100 transition-colors min-h-[32px] flex-shrink-0"
+          >
+            Remove
+          </button>
+        )}
+      </div>
+
+      {/* Second row: Controls - wraps on mobile, inline on desktop */}
+      <div className="flex flex-wrap items-center gap-2 md:gap-1.5">
         {block.type === 'full' && (
-          <SpeedSelector
-            value={block.fullSpeed ?? 1}
-            onChange={(value) => onChange({ fullSpeed: value })}
-          />
+          isEditMode ? (
+            <SpeedSelector
+              value={block.fullSpeed ?? 1}
+              onChange={(value) => onChange({ fullSpeed: value })}
+            />
+          ) : (
+            <div className="inline-flex items-center gap-1.5 text-sm">
+              <span className="text-gray-500 text-xs md:text-sm">Speed</span>
+              <span className="text-gray-900 font-medium">{getSpeedLabel(block.fullSpeed ?? 1)}</span>
+            </div>
+          )
         )}
         {block.type === 'wait' && (
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
-            <span style={{ color: '#6b7280' }}>(seconds)</span>
-            <input
-              type="number"
-              min={0}
-              step={0.5}
-              value={block.waitSeconds ?? ''}
-              onChange={(e) => {
-                const val = e.target.value
-                const num = val === '' ? undefined : Math.max(1, Number(val))
-                onChange({ waitSeconds: num })
-              }}
-              style={{
-                width: 80,
-                padding: '4px 6px',
-                border: '1px solid #e5e7eb',
-                borderRadius: 6
-              }}
-            />
-          </label>
-        )}
-        {block.type === 'sentence' && (
-          <>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
-              <span style={{ color: '#6b7280' }}>Gap</span>
-              <span style={{ color: '#6b7280' }}>(seconds)</span>
+          isEditMode ? (
+            <label className="inline-flex items-center gap-1.5 text-sm">
+              <span className="text-gray-500 text-xs md:text-sm">(seconds)</span>
               <input
                 type="number"
                 min={0}
                 step={0.5}
-                value={block.sentenceGapSeconds ?? ''}
+                value={block.waitSeconds ?? ''}
                 onChange={(e) => {
                   const val = e.target.value
                   const num = val === '' ? undefined : Math.max(1, Number(val))
-                  onChange({ sentenceGapSeconds: num })
+                  onChange({ waitSeconds: num })
                 }}
-                style={{
-                  width: 80,
-                  padding: '4px 6px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 6
-                }}
+                className="w-20 px-1.5 py-1 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </label>
-            <SpeedSelector
-              value={block.sentenceSpeed ?? 1}
-              onChange={(value) => onChange({ sentenceSpeed: value })}
-            />
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
-              <span style={{ color: '#6b7280' }}>Repeat</span>
-              <input
-                type="number"
-                min={1}
-                max={10}
-                value={block.repeat ?? ''}
-                onChange={(e) => {
-                  const val = e.target.value
-                  const num = val === '' ? undefined : Math.max(1, Number(val))
-                  onChange({ repeat: num })
-                }}
-                style={{
-                  width: 60,
-                  padding: '4px 6px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 6
-                }}
+          ) : (
+            <div className="inline-flex items-center gap-1.5 text-sm">
+              <span className="text-gray-500 text-xs md:text-sm">(seconds)</span>
+              <span className="text-gray-900 font-medium">{block.waitSeconds ?? 0}</span>
+            </div>
+          )
+        )}
+        {block.type === 'sentence' && (
+          <>
+            {isEditMode ? (
+              <label className="inline-flex items-center gap-1.5 text-sm">
+                <span className="text-gray-500 text-xs md:text-sm">Gap</span>
+                <span className="text-gray-500 text-xs md:text-sm">(seconds)</span>
+                <input
+                  type="number"
+                  min={0}
+                  step={0.5}
+                  value={block.sentenceGapSeconds ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    const num = val === '' ? undefined : Math.max(1, Number(val))
+                    onChange({ sentenceGapSeconds: num })
+                  }}
+                  className="w-20 px-1.5 py-1 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </label>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 text-sm">
+                <span className="text-gray-500 text-xs md:text-sm">Gap</span>
+                <span className="text-gray-500 text-xs md:text-sm">(seconds)</span>
+                <span className="text-gray-900 font-medium">{block.sentenceGapSeconds ?? 0}</span>
+              </div>
+            )}
+            {isEditMode ? (
+              <SpeedSelector
+                value={block.sentenceSpeed ?? 1}
+                onChange={(value) => onChange({ sentenceSpeed: value })}
               />
-            </label>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 text-sm">
+                <span className="text-gray-500 text-xs md:text-sm">Speed</span>
+                <span className="text-gray-900 font-medium">{getSpeedLabel(block.sentenceSpeed ?? 1)}</span>
+              </div>
+            )}
+            {isEditMode ? (
+              <label className="inline-flex items-center gap-1.5 text-sm">
+                <span className="text-gray-500 text-xs md:text-sm">Repeat</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={block.repeat ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    const num = val === '' ? undefined : Math.max(1, Number(val))
+                    onChange({ repeat: num })
+                  }}
+                  className="w-16 px-1.5 py-1 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </label>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 text-sm">
+                <span className="text-gray-500 text-xs md:text-sm">Repeat</span>
+                <span className="text-gray-900 font-medium">{block.repeat ?? 1}</span>
+              </div>
+            )}
           </>
         )}
       </div>
-      <button onClick={onRemove} style={{
-        padding: '6px 8px',
-        borderRadius: 8,
-        border: '1px solid #fecaca',
-        background: '#fee2e2',
-        color: '#991b1b',
-        cursor: 'pointer'
-      }}>Remove</button>
     </div>
   )
 }
