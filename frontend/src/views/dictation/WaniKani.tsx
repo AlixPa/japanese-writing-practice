@@ -57,7 +57,7 @@ export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: stri
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
-        <label className="text-gray-500 text-sm md:min-w-[40px]">Level</label>
+        <label className="text-gray-500 text-sm md:min-w-[60px]">Level</label>
         <div className="flex items-center gap-1">
           <button
             type="button"
