@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from .api import api_router
 from .config.env_var import ENV
 from .config.path import path_config
-from .config.runtime import USES_LOCAL_FILES, service_env
+from .config.runtime import SYNC_DB_S3, service_env
 from .scripts.manage_dbfile_s3 import load_sqlite_file, save_sqlite_file
 
 
@@ -26,9 +26,7 @@ async def periodic_backup():
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
-    if USES_LOCAL_FILES:
-        yield
-    else:
+    if SYNC_DB_S3:
         await asyncio.to_thread(load_sqlite_file)
         task = asyncio.create_task(periodic_backup())
         try:
@@ -38,6 +36,8 @@ async def lifespan(app: FastAPI):
             with contextlib.suppress(Exception):
                 await task
             await asyncio.to_thread(save_sqlite_file)
+    else:
+        yield
 
 
 app = FastAPI(lifespan=lifespan)

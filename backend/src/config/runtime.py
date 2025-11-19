@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass
 
-USES_LOCAL_FILES = os.environ.get("USES_LOCAL_FILES") == "True"
+USES_LOCAL_AUDIO_FILES = os.environ.get("USES_LOCAL_AUDIO_FILES") == "True"
 SYNC_DB_S3 = os.environ.get("SYNC_DB_S3") == "True"
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 
