@@ -12,6 +12,7 @@ from src.models.database import (
     StoryChunkAudios,
     StoryChunks,
 )
+from src.models.uuid4str import UUID4Str
 
 from .models import AudioMetadata
 
@@ -34,7 +35,7 @@ def get_audio_url(audio_url: str) -> str:
         s3.close()
 
 
-async def load_metadata(story_id: str, speed: int) -> AudioMetadata:
+async def load_metadata(story_id: UUID4Str, speed: int) -> AudioMetadata:
     sqlite = SQLiteClient(logger)
 
     try:
@@ -53,7 +54,7 @@ async def load_metadata(story_id: str, speed: int) -> AudioMetadata:
     return AudioMetadata(audio_text=story.text, audio_url=get_audio_url(audio.url))
 
 
-async def load_sentence_metadata(story_id: str, speed: int) -> list[AudioMetadata]:
+async def load_sentence_metadata(story_id: UUID4Str, speed: int) -> list[AudioMetadata]:
     sqlite = SQLiteClient(logger)
 
     if not sqlite.id_exists(table=Stories, id=story_id):

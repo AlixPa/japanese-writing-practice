@@ -1,4 +1,5 @@
 import sqlite3
+import threading
 import traceback
 from abc import ABC
 from logging import Logger
@@ -21,6 +22,8 @@ from .exceptions import (
 
 GenericTableModel = TypeVar("GenericTableModel", bound=BaseTableModel)
 
+_thread_local = threading.local()
+
 
 class SQLiteClient(ABC):
     def __init__(
@@ -36,13 +39,19 @@ class SQLiteClient(ABC):
         self._connect()
 
     def _connect(self) -> None:
-        if self.connection:
-            self.connection.close()
-        self.connection = sqlite3.connect(
-            path_config.sqlite_db_file, isolation_level=self._isolation_level  # type: ignore
-        )
-        self.connection.row_factory = sqlite3.Row
-        self.connection.execute("PRAGMA foreign_keys = ON;")
+        connection_identifier = f"sqlite_connection_{self._isolation_level or 'NONE'}"
+
+        if not hasattr(_thread_local, connection_identifier):
+            conn = sqlite3.connect(
+                path_config.sqlite_db_file,
+                check_same_thread=False,
+                isolation_level=self._isolation_level,  # type: ignore
+            )
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA foreign_keys = ON;")
+            setattr(_thread_local, connection_identifier, conn)
+
+        self.connection = getattr(_thread_local, connection_identifier)
 
     def _logging(
         self, cursor: sqlite3.Cursor, query: str, params: tuple | None
@@ -84,6 +93,8 @@ class SQLiteClient(ABC):
 
         for col, ls_val in cond_in.items():
             if len(ls_val) == 0:
+                # No values in the in -> no match
+                conds.append("AND 1 = 0")
                 continue
             conds.append(f"AND {col} IN (" + ",".join(["?"] * len(ls_val)) + ")")
             args.extend(ls_val)
@@ -344,8 +355,6 @@ class SQLiteClient(ABC):
         if not self.connection:
             raise SqliteNoConnectionError("Cannot commit if transaction is closed.")
         self.connection.commit()
-        self.connection.close()
-        self._connect()
 
     def rollback(self) -> None:
         """
@@ -354,8 +363,6 @@ class SQLiteClient(ABC):
         if not self.connection:
             raise SqliteNoConnectionError("Cannot commit if transaction is closed.")
         self.connection.rollback()
-        self.connection.close()
-        self._connect()
 
     def insert_one(
         self,

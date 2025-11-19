@@ -2,30 +2,14 @@ import React from 'react'
 
 export function CustomGenerationView() {
   return (
-    <section style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
-      <h1 style={{ margin: 0, fontSize: 24 }}>Custom Generation</h1>
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        padding: '40px 20px'
-      }}>
-        <div style={{
-          border: '1px solid #e5e7eb',
-          borderRadius: 12,
-          padding: 32,
-          background: 'white',
-          maxWidth: 400,
-          width: '100%'
-        }}>
-          <h2 style={{ margin: 0, fontSize: 20, marginBottom: 8, color: '#111827' }}>Coming Soon</h2>
-          <p style={{ margin: 0, color: '#6b7280', fontSize: 16, marginBottom: 8 }}>
+    <section className="flex flex-col gap-3 h-full">
+      <div className="flex-1 flex flex-col items-center justify-center text-center p-4 md:p-10">
+        <div className="border border-gray-200 rounded-xl p-6 md:p-8 bg-white max-w-full md:max-w-md w-full">
+          <h2 className="m-0 text-lg md:text-xl mb-2 text-gray-900 font-semibold">Coming Soon</h2>
+          <p className="m-0 text-gray-500 text-sm md:text-base mb-2">
             Custom Generation will be available in the advanced version.
           </p>
-          <p style={{ margin: 0, color: '#9ca3af', fontSize: 14 }}>
+          <p className="m-0 text-gray-400 text-xs md:text-sm">
             Create your own dictation exercises with custom text and settings.
           </p>
         </div>

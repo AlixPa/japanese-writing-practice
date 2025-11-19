@@ -10,37 +10,28 @@ interface StoryBlockProps {
 
 export function StoryBlock({ loading, error, storyText, revealed, onToggleRevealed }: StoryBlockProps) {
   return (
-    <div style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: 12, background: 'white' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-start', marginBottom: 8 }}>
-        <div style={{ fontWeight: 600 }}>Dictation text</div>
+    <div className="border border-gray-200 rounded-xl p-3 md:p-4 bg-white">
+      <div className="flex items-center gap-2 justify-start mb-2">
+        <div className="font-semibold text-sm md:text-base">Dictation text</div>
         <button
           onClick={onToggleRevealed}
           disabled={loading || !!error || !storyText}
-          style={{ 
-            padding: '4px 8px', 
-            borderRadius: 6, 
-            border: '1px solid #e5e7eb', 
-            background: '#f9fafb', 
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}
+          className="px-2 py-1 rounded-md border border-gray-200 bg-gray-50 cursor-pointer flex items-center gap-1 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span style={{ fontSize: '14px' }}>
+          <span className="text-sm">
             {revealed ? '○' : '●'}
           </span>
-          {revealed ? 'Hide' : 'Show'}
+          <span className="text-xs">{revealed ? 'Hide' : 'Show'}</span>
         </button>
       </div>
       {loading ? (
-        <div style={{ color: '#6b7280' }}>Loading…</div>
+        <div className="text-gray-500 text-sm md:text-base">Loading…</div>
       ) : error ? (
-        <div style={{ color: '#991b1b' }}>{error}</div>
+        <div className="text-red-800 text-sm md:text-base">{error}</div>
       ) : (
         <div>
-          <div style={{ whiteSpace: 'pre-wrap', filter: revealed ? 'none' : (storyText ? 'blur(6px)' : 'none') }}>
-            {storyText || <span style={{ color: '#6b7280' }}>No dictation text</span>}
+          <div className={`whitespace-pre-wrap text-sm md:text-base ${revealed || !storyText ? '' : 'blur-[6px]'}`}>
+            {storyText || <span className="text-gray-500">No dictation text</span>}
           </div>
         </div>
       )}
