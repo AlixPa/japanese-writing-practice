@@ -2,7 +2,7 @@ from src.clients.aws import S3Client
 from src.clients.sqlite import SQLiteClient, SqliteIdNotFoundError
 from src.config.aws import aws_config
 from src.config.path import path_config
-from src.config.runtime import USES_LOCAL_FILES
+from src.config.runtime import USES_LOCAL_AUDIO_FILES
 from src.exceptions.http import WrongArgumentException
 from src.logger import get_logger
 from src.models.database import (
@@ -21,7 +21,7 @@ logger = get_logger()
 
 ## TODO: async
 def get_audio_url(audio_url: str) -> str:
-    if USES_LOCAL_FILES:
+    if USES_LOCAL_AUDIO_FILES:
         return f"/api/audio/{audio_url}"
 
     s3 = S3Client()

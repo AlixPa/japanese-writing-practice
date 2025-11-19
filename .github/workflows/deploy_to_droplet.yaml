@@ -83,7 +83,7 @@ jobs:
               --restart unless-stopped \
               -e AWS_ACCESS_KEY=$AWS_ACCESS_KEY_APP \
               -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_APP \
-              -e USES_LOCAL_FILES=False \
+              -e USES_LOCAL_AUDIO_FILES=False \
               -e SYNC_DB_S3=True \
               $ECR_REGISTRY/alixparadis/japanese-writing-practice:jwp-app-latest
             docker system prune -a --volumes -f

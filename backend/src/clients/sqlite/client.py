@@ -6,10 +6,8 @@ from logging import Logger
 from typing import Any, Literal, Type, TypeVar
 
 from src.config.path import path_config
-from src.config.runtime import SYNC_DB_S3
 from src.logger import get_logger
 from src.models.database import BaseTableModel
-from src.scripts.manage_dbfile_s3 import save_sqlite_file
 
 from .exceptions import (
     SqliteColumnInconsistencyError,
@@ -451,8 +449,6 @@ class SQLiteClient(ABC):
             query=" ".join(query_parts),
             args=tuple(args),
         )
-        if SYNC_DB_S3:
-            save_sqlite_file()
 
     def update_by_id(
         self,
@@ -513,9 +509,6 @@ class SQLiteClient(ABC):
         query_parts.append(";")
 
         self.execute(query=" ".join(query_parts), args=tuple(values))
-
-        if SYNC_DB_S3:
-            save_sqlite_file()
 
     def delete(
         self,
@@ -584,8 +577,6 @@ class SQLiteClient(ABC):
         query_parts.append(";")
 
         self.execute(query=" ".join(query_parts), args=tuple(ids_to_delete_ls))
-        if SYNC_DB_S3:
-            save_sqlite_file()
         return res_Sql
 
     def delete_by_id(
