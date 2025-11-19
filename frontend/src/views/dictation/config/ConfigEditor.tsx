@@ -67,10 +67,25 @@ export function ConfigEditor({ blocks, onBlocksChange, isEditMode = false }: Pro
 
   const AddButton = ({ index }: { index: number }) => {
     const isOpen = openMenuIndex === index
+    const [openAbove, setOpenAbove] = useState(false)
+    const buttonRef = useRef<HTMLButtonElement>(null)
+    
+    useEffect(() => {
+      if (isOpen && buttonRef.current) {
+        const buttonRect = buttonRef.current.getBoundingClientRect()
+        const viewportHeight = window.innerHeight
+        const spaceBelow = viewportHeight - buttonRect.bottom
+        const estimatedMenuHeight = 150 // Approximate height of menu (3 items * 44px + padding)
+        
+        // If not enough space below, open above
+        setOpenAbove(spaceBelow < estimatedMenuHeight)
+      }
+    }, [isOpen])
     
     return (
       <div className="relative">
         <button
+          ref={buttonRef}
           onClick={() => setOpenMenuIndex(isOpen ? null : index)}
           className="w-full py-0.5 rounded border border-dashed border-gray-300 bg-white text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-colors flex items-center justify-center h-6"
           aria-label="Add block"
@@ -84,7 +99,9 @@ export function ConfigEditor({ blocks, onBlocksChange, isEditMode = false }: Pro
               if (el) menuRefs.current.set(index, el)
               else menuRefs.current.delete(index)
             }}
-            className="absolute top-full mt-2 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+            className={`absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 ${
+              openAbove ? 'bottom-full mb-2' : 'top-full mt-2'
+            }`}
           >
             {blockTypes.map(({ type, label }) => (
               <button
