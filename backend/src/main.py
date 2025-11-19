@@ -1,4 +1,5 @@
-from contextlib import asynccontextmanager
+import asyncio
+import contextlib
 
 from asgi_correlation_id.middleware import CorrelationIdMiddleware, is_valid_uuid4
 from fastapi import FastAPI, Request
@@ -10,14 +11,33 @@ from .api import api_router
 from .config.env_var import ENV
 from .config.path import path_config
 from .config.runtime import USES_LOCAL_FILES, service_env
-from .scripts.manage_dbfile_s3 import load_sqlite_file
+from .scripts.manage_dbfile_s3 import load_sqlite_file, save_sqlite_file
 
 
-@asynccontextmanager
+async def periodic_backup():
+    while True:
+        try:
+            # 5 min syncup
+            await asyncio.sleep(300)
+        except asyncio.CancelledError:
+            break
+        await asyncio.to_thread(save_sqlite_file)
+
+
+@contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
-    if not USES_LOCAL_FILES:
-        load_sqlite_file()
-    yield
+    if USES_LOCAL_FILES:
+        yield
+    else:
+        await asyncio.to_thread(load_sqlite_file)
+        task = asyncio.create_task(periodic_backup())
+        try:
+            yield
+        finally:
+            task.cancel()
+            with contextlib.suppress(Exception):
+                await task
+            await asyncio.to_thread(save_sqlite_file)
 
 
 app = FastAPI(lifespan=lifespan)
