@@ -45,11 +45,11 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag jwp-app:latest ${{ steps.ecr.outputs.registry }}/alixparadis/japanese-writing-practice:jwp-app-latest
+          docker tag jwp-app:latest ${{ steps.ecr.outputs.registry }}/alixparadis:jwp-app-latest
 
       - name: Push Docker image to ECR
         run: |
-          docker push ${{ steps.ecr.outputs.registry }}/alixparadis/japanese-writing-practice:jwp-app-latest
+          docker push ${{ steps.ecr.outputs.registry }}/alixparadis:jwp-app-latest
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
@@ -74,16 +74,16 @@ jobs:
             aws ecr get-login-password | docker login \
               --username AWS \
               --password-stdin $ECR_REGISTRY
-            docker network create jwp_network || true
-            docker pull $ECR_REGISTRY/alixparadis/japanese-writing-practice:jwp-app-latest
+            docker network create internal_network || true
+            docker pull $ECR_REGISTRY/alixparadis:jwp-app-latest
             docker stop jwp-deployement || true
             docker rm jwp-deployement || true
             docker run -d --name jwp-deployement \
-              --network jwp_network \
+              --network internal_network \
               --restart unless-stopped \
               -e AWS_ACCESS_KEY=$AWS_ACCESS_KEY_APP \
               -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_APP \
               -e USES_LOCAL_AUDIO_FILES=False \
               -e SYNC_DB_S3=True \
-              $ECR_REGISTRY/alixparadis/japanese-writing-practice:jwp-app-latest
+              $ECR_REGISTRY/alixparadis:jwp-app-latest
             docker system prune -a --volumes -f

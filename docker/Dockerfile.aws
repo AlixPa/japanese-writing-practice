@@ -8,6 +8,8 @@ COPY ./frontend/dist /frontend/dist
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
+EXPOSE 8080
+
 COPY shell/docker_entrypoint.sh /docker_entrypoint.sh
 RUN chmod +x /docker_entrypoint.sh
 CMD ["/docker_entrypoint.sh"]
