@@ -48,4 +48,5 @@ async def get_current_user(
         user_id = user[0].id
 
     base_logger.info(f"Continue request for {user_id=}")
+    verified_tokens_cache[authorization] = user_id
     return user_id
