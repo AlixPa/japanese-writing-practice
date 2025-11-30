@@ -239,6 +239,9 @@ export function Player({
 
   // Fetch duration for current element selection
   useEffect(() => {
+    // Skip during playback - playSequence handles duration fetching internally
+    if (isPlaying) return
+    
     const fetchCurrentElementDuration = async () => {
       if (!storyId || activeIndex === null) return
       if (isFetchingRef.current) return // Prevent concurrent fetches
@@ -251,7 +254,7 @@ export function Player({
     }
     
     fetchCurrentElementDuration()
-  }, [storyId, activeIndex, refreshTrigger])
+  }, [storyId, activeIndex, refreshTrigger, isPlaying])
 
   // Reset player state when storyId changes
   useEffect(() => {
