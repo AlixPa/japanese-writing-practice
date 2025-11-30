@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { api, StoryResponse } from '@/api/client'
 import { Player } from './components/Player'
 import { StoryBlock } from './components/StoryBlock'
@@ -16,7 +16,8 @@ export function DictationWaniKani({ selectedConfigId }: { selectedConfigId: stri
   const [playError, setPlayError] = useState<string | null>(null)
   
   const { config: selectedConfig } = useConfigById(selectedConfigId)
-  const configSequence = selectedConfig?.sequence || []
+  // Memoize configSequence to prevent unnecessary reference changes
+  const configSequence = useMemo(() => selectedConfig?.sequence || [], [selectedConfig?.sequence])
 
   useEffect(() => {
     let cancelled = false

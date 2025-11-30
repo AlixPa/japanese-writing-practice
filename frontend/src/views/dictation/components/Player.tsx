@@ -31,6 +31,8 @@ export function Player({
   // Consolidated refs
   const playAbortRef = useRef<{ aborted: boolean; currentAudio?: HTMLAudioElement } | null>(null)
   const isPausedRef = useRef<boolean>(false)
+  // Reuse single audio element to preserve gesture context on mobile
+  const audioElementRef = useRef<HTMLAudioElement | null>(null)
   
   // Unified cache: stores both metadata and audio blob together
   // Key: `${storyId}-${speed}` for full audio
@@ -53,6 +55,9 @@ export function Player({
   
   // Track previous config to detect actual changes
   const prevConfigRef = useRef<Array<{ wait?: number; speed?: number }>>([])
+  
+  // Track if we're currently fetching to prevent race conditions
+  const isFetchingRef = useRef<boolean>(false)
 
   // Helper function to detect config changes
   const hasConfigChanged = (currentConfig: Array<{ wait?: number; speed?: number }>) => {
@@ -101,69 +106,90 @@ export function Player({
   // Unified duration fetching function
   const fetchElementDuration = async (index: number) => {
     if (!storyId || index === null) return
+    if (index < 0 || index >= configSequence.length) return
 
-    const step = configSequence[index]
-    const hasWait = Object.prototype.hasOwnProperty.call(step, 'wait')
-    const hasSpeed = Object.prototype.hasOwnProperty.call(step, 'speed')
-    
-    // Create a unique key for this selection to avoid duplicate fetches
-    const selectionKey = `${storyId}-${index}-${hasWait}-${hasSpeed}`
-    
-    // Check duration cache first
-    if (durationCache.current.has(selectionKey)) {
-      const cachedDuration = durationCache.current.get(selectionKey)!
-      setSelectedSubElementDuration(cachedDuration)
-      return
-    }
-    
-    let duration: number | null = null
-    
-    if (hasWait && hasSpeed) {
-      // Sentence-by-sentence element - set up default sub-element and fetch duration
-      setCurrentSubElement({ type: 'audio', index: 0 })
+    // Prevent concurrent fetches
+    if (isFetchingRef.current) return
+    isFetchingRef.current = true
+
+    try {
+      const step = configSequence[index]
+      const hasWait = Object.prototype.hasOwnProperty.call(step, 'wait')
+      const hasSpeed = Object.prototype.hasOwnProperty.call(step, 'speed')
       
-      // Fetch sentence chunks from cache (or fetch if not cached)
-      try {
-        const speed = step.speed || 100
-        const chunks = await getOrFetchSentenceChunks(speed)
+      // Create a unique key for this selection to avoid duplicate fetches
+      const selectionKey = `${storyId}-${index}-${hasWait}-${hasSpeed}`
+      
+      // Check duration cache first
+      if (durationCache.current.has(selectionKey)) {
+        const cachedDuration = durationCache.current.get(selectionKey)!
+        setSelectedSubElementDuration(cachedDuration)
         
-        // Update sentenceChunks state with just metadata for display
-        const list = chunks.map(chunk => ({ audio_url: chunk.metadata.audio_url }))
-        setSentenceChunks(list)
-        
-        // Fetch duration for the first audio chunk (default selection)
-        if (chunks.length > 0) {
-          const defaultSubElementKey = `${storyId}-${index}-audio-0`
-          
-          // Check cache first
-          if (durationCache.current.has(defaultSubElementKey)) {
-            const cachedDuration = durationCache.current.get(defaultSubElementKey)!
-            setSelectedSubElementDuration(cachedDuration)
-          } else {
-            // Get duration from cached blob
-            const duration = await getAudioDurationFromBlob(chunks[0].audioBlob)
-            setSelectedSubElementDuration(duration)
-            
-            // Cache the duration for the default sub-element selection
-            durationCache.current.set(defaultSubElementKey, duration)
+        // For sentence-by-sentence, also restore sentenceChunks if cached
+        if (hasWait && hasSpeed) {
+          const speed = step.speed || 100
+          const cacheKey = `${storyId}-${speed}`
+          if (sentenceChunksCache.current.has(cacheKey)) {
+            const chunks = sentenceChunksCache.current.get(cacheKey)!
+            const list = chunks.map(chunk => ({ audio_url: chunk.metadata.audio_url }))
+            setSentenceChunks(list)
+            setCurrentSubElement({ type: 'audio', index: 0 })
           }
         }
-      } catch (e) {
-        console.error('Failed to fetch sentence metadata:', e)
-        setSentenceChunks([])
+        return
       }
-      return
-    } else if (hasSpeed) {
-      // Full dictation element - fetch duration
-      duration = await getMainAudioDuration(step.speed || 100)
-    } else if (hasWait) {
-      // Wait element - calculate duration
-      duration = getWaitDuration(step.wait || 0)
-    }
-    
-    if (duration !== null) {
-      setSelectedSubElementDuration(duration)
-      durationCache.current.set(selectionKey, duration)
+      
+      let duration: number | null = null
+      
+      if (hasWait && hasSpeed) {
+        // Sentence-by-sentence element - set up default sub-element and fetch duration
+        setCurrentSubElement({ type: 'audio', index: 0 })
+        
+        // Fetch sentence chunks from cache (or fetch if not cached)
+        try {
+          const speed = step.speed || 100
+          const chunks = await getOrFetchSentenceChunks(speed)
+          
+          // Update sentenceChunks state with just metadata for display
+          const list = chunks.map(chunk => ({ audio_url: chunk.metadata.audio_url }))
+          setSentenceChunks(list)
+          
+          // Fetch duration for the first audio chunk (default selection)
+          if (chunks.length > 0) {
+            const defaultSubElementKey = `${storyId}-${index}-audio-0`
+            
+            // Check cache first
+            if (durationCache.current.has(defaultSubElementKey)) {
+              const cachedDuration = durationCache.current.get(defaultSubElementKey)!
+              setSelectedSubElementDuration(cachedDuration)
+            } else {
+              // Get duration from cached blob
+              const duration = await getAudioDurationFromBlob(chunks[0].audioBlob)
+              setSelectedSubElementDuration(duration)
+              
+              // Cache the duration for the default sub-element selection
+              durationCache.current.set(defaultSubElementKey, duration)
+            }
+          }
+        } catch (e) {
+          console.error('Failed to fetch sentence metadata:', e)
+          setSentenceChunks([])
+        }
+        return
+      } else if (hasSpeed) {
+        // Full dictation element - fetch duration
+        duration = await getMainAudioDuration(step.speed || 100)
+      } else if (hasWait) {
+        // Wait element - calculate duration
+        duration = getWaitDuration(step.wait || 0)
+      }
+      
+      if (duration !== null) {
+        setSelectedSubElementDuration(duration)
+        durationCache.current.set(selectionKey, duration)
+      }
+    } finally {
+      isFetchingRef.current = false
     }
   }
 
@@ -182,11 +208,17 @@ export function Player({
 
   // Handle config changes - stop playback and reset to first element
   useEffect(() => {
+    // Skip if currently fetching to avoid race conditions
+    if (isFetchingRef.current) return
+    
     const handleConfigChange = async () => {
       if (!storyId) return
       
-      // Check if config actually changed
+      // Check if config actually changed (using current ref value)
       const configChanged = hasConfigChanged(configSequence)
+      
+      // Update ref after check to track the new state
+      prevConfigRef.current = [...configSequence]
       
       if (configChanged) {
         // Stop playback and reset to first element if config changed
@@ -199,20 +231,22 @@ export function Player({
           setSentenceChunks([])
           setSelectedSubElementDuration(null)
         }
-        // Update the previous config reference
-        prevConfigRef.current = [...configSequence]
         // Fetch duration for the first element
         await fetchElementDuration(0)
       }
     }
     
     handleConfigChange()
-  }, [configSequence, storyId, isPlaying])
+  }, [configSequence, storyId])
 
   // Fetch duration for current element selection
   useEffect(() => {
+    // Skip during playback - playSequence handles duration fetching internally
+    if (isPlaying) return
+    
     const fetchCurrentElementDuration = async () => {
       if (!storyId || activeIndex === null) return
+      if (isFetchingRef.current) return // Prevent concurrent fetches
       
       // Only fetch if config hasn't changed (config change effect handles that case)
       const configChanged = hasConfigChanged(configSequence)
@@ -222,27 +256,35 @@ export function Player({
     }
     
     fetchCurrentElementDuration()
-  }, [storyId, activeIndex, refreshTrigger])
+  }, [storyId, activeIndex, refreshTrigger, isPlaying])
 
   // Reset player state when storyId changes
   useEffect(() => {
-    // Clear caches if story changed
-    if (currentStoryIdRef.current !== storyId) {
+    // Only reset if storyId actually changed to a different non-empty value
+    // Don't reset if storyId is temporarily empty during fetches (both empty = no change)
+    const prevStoryId = currentStoryIdRef.current
+    if (prevStoryId === storyId) return
+    if (!storyId && !prevStoryId) return // Both empty, no change
+    
+    // Only reset if changing from one valid storyId to another valid storyId
+    // Don't reset when going from valid to empty (temporary state during fetches)
+    const isChangingToNewStory = prevStoryId && storyId && prevStoryId !== storyId
+    
+    if (isChangingToNewStory) {
+      // Clear caches when story actually changed
       audioCache.current.clear()
       sentenceChunksCache.current.clear()
       pendingAudioRequests.current.clear()
       pendingSentenceRequests.current.clear()
       durationCache.current.clear()
-      currentStoryIdRef.current = storyId
+      
+      // Reset player state only when changing to a new story
+      resetPlayerState(true) // Reset to first element
+      onPlayError(null)
     }
     
-    // Reset all player state
-    resetPlayerState(true) // Reset to first element
-    onPlayError(null)
-    
-    // Let the first useEffect handle duration fetching to avoid duplicates
-    // The first useEffect will run after this one and handle the duration fetching
-    // for the reset activeIndex (0) with the new storyId
+    // Always update the ref to track the current storyId
+    currentStoryIdRef.current = storyId
   }, [storyId])
 
 
@@ -395,15 +437,27 @@ export function Player({
   const playAudioBlob = (blob: Blob): Promise<void> => {
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(blob)
-      const audio = new Audio(url)
       
-      // Clean up previous audio if exists
-      if (playAbortRef.current?.currentAudio) {
-        try {
-          playAbortRef.current.currentAudio.pause()
-          playAbortRef.current.currentAudio = undefined
-        } catch {}
+      // Reuse single audio element to preserve gesture context on mobile
+      let audio = audioElementRef.current
+      if (!audio) {
+        audio = new Audio()
+        audioElementRef.current = audio
       }
+      
+      // Clean up previous playback and remove old listeners
+      try {
+        audio.pause()
+        audio.currentTime = 0
+        audio.src = ''
+        audio.onloadedmetadata = null
+        audio.ontimeupdate = null
+        audio.onended = null
+        audio.onerror = null
+      } catch {}
+      
+      // Set up new audio source
+      audio.src = url
       
       audio.onloadedmetadata = () => {
         if (playAbortRef.current?.aborted) return
@@ -431,11 +485,13 @@ export function Player({
         URL.revokeObjectURL(url)
         reject(new Error('Audio playback error')) 
       }
+      
       playAbortRef.current = { aborted: false, currentAudio: audio }
-      audio.play().catch(err => { 
+      
+      audio.play().catch(err => {
         setProgress(null)
         URL.revokeObjectURL(url)
-        reject(err) 
+        reject(err)
       })
     })
   }
@@ -733,7 +789,15 @@ export function Player({
         }
       }
     } else {
-      // Start playing
+      // Initialize audio element synchronously in gesture context to unlock mobile browsers
+      if (!audioElementRef.current) {
+        audioElementRef.current = new Audio()
+        // Unlock by playing empty audio immediately (synchronously in gesture)
+        audioElementRef.current.play().catch(() => {})
+        audioElementRef.current.pause()
+      }
+      
+      // Start playing - state updates happen after audio is unlocked
       onPlayError(null)
       setIsPlaying(true)
       setPaused(false)
