@@ -31,6 +31,8 @@ export function Player({
   // Consolidated refs
   const playAbortRef = useRef<{ aborted: boolean; currentAudio?: HTMLAudioElement } | null>(null)
   const isPausedRef = useRef<boolean>(false)
+  // Reuse single audio element to preserve gesture context on mobile
+  const audioElementRef = useRef<HTMLAudioElement | null>(null)
   
   // Unified cache: stores both metadata and audio blob together
   // Key: `${storyId}-${speed}` for full audio
@@ -435,15 +437,27 @@ export function Player({
   const playAudioBlob = (blob: Blob): Promise<void> => {
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(blob)
-      const audio = new Audio(url)
       
-      // Clean up previous audio if exists
-      if (playAbortRef.current?.currentAudio) {
-        try {
-          playAbortRef.current.currentAudio.pause()
-          playAbortRef.current.currentAudio = undefined
-        } catch {}
+      // Reuse single audio element to preserve gesture context on mobile
+      let audio = audioElementRef.current
+      if (!audio) {
+        audio = new Audio()
+        audioElementRef.current = audio
       }
+      
+      // Clean up previous playback and remove old listeners
+      try {
+        audio.pause()
+        audio.currentTime = 0
+        audio.src = ''
+        audio.onloadedmetadata = null
+        audio.ontimeupdate = null
+        audio.onended = null
+        audio.onerror = null
+      } catch {}
+      
+      // Set up new audio source
+      audio.src = url
       
       audio.onloadedmetadata = () => {
         if (playAbortRef.current?.aborted) return
@@ -775,14 +789,15 @@ export function Player({
         }
       }
     } else {
-      // Unlock audio context on mobile browsers - must be done synchronously in user gesture
-      try {
-        const unlockAudio = new Audio()
-        unlockAudio.volume = 0
-        unlockAudio.play().then(() => unlockAudio.pause()).catch(() => {})
-      } catch {}
+      // Initialize audio element synchronously in gesture context to unlock mobile browsers
+      if (!audioElementRef.current) {
+        audioElementRef.current = new Audio()
+        // Unlock by playing empty audio immediately (synchronously in gesture)
+        audioElementRef.current.play().catch(() => {})
+        audioElementRef.current.pause()
+      }
       
-      // Start playing
+      // Start playing - state updates happen after audio is unlocked
       onPlayError(null)
       setIsPlaying(true)
       setPaused(false)
