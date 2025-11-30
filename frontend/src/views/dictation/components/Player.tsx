@@ -76,7 +76,7 @@ export function Player({
   }
 
   // Unified state reset function
-  const resetPlayerState = (resetToFirst = false, preserveSentenceChunks = false) => {
+  const resetPlayerState = (resetToFirst = false) => {
     // Stop any ongoing playback
     if (playAbortRef.current) {
       playAbortRef.current.aborted = true
@@ -96,10 +96,7 @@ export function Player({
       setActiveIndex(0)
     }
     setCurrentSubElement(null)
-    // Only clear sentenceChunks if not preserving them (e.g., during active fetch)
-    if (!preserveSentenceChunks) {
-      setSentenceChunks([])
-    }
+    setSentenceChunks([])
     setSelectedSubElementDuration(null)
     setCurrentCycle(null)
   }
@@ -209,13 +206,16 @@ export function Player({
 
   // Handle config changes - stop playback and reset to first element
   useEffect(() => {
+    // Skip if currently fetching to avoid race conditions
+    if (isFetchingRef.current) return
+    
     const handleConfigChange = async () => {
       if (!storyId) return
       
-      // Check if config actually changed
+      // Check if config actually changed (using current ref value)
       const configChanged = hasConfigChanged(configSequence)
       
-      // Always update the ref after comparison to track the current state
+      // Update ref after check to track the new state
       prevConfigRef.current = [...configSequence]
       
       if (configChanged) {
@@ -224,13 +224,9 @@ export function Player({
           resetPlayerState(true) // Reset to first element and stop playback
         } else {
           // Just reset to first element if not playing
-          // Don't clear sentenceChunks if we're about to fetch them
           setActiveIndex(0)
           setCurrentSubElement(null)
-          // Only clear if not currently fetching (to avoid showing "Loading..." unnecessarily)
-          if (!isFetchingRef.current) {
-            setSentenceChunks([])
-          }
+          setSentenceChunks([])
           setSelectedSubElementDuration(null)
         }
         // Fetch duration for the first element
@@ -239,7 +235,6 @@ export function Player({
     }
     
     handleConfigChange()
-    // Removed isPlaying from dependencies - config changes shouldn't depend on playback state
   }, [configSequence, storyId])
 
   // Fetch duration for current element selection
