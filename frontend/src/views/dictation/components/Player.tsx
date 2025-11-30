@@ -188,6 +188,9 @@ export function Player({
       // Check if config actually changed
       const configChanged = hasConfigChanged(configSequence)
       
+      // Always update the ref after comparison to track the current state
+      prevConfigRef.current = [...configSequence]
+      
       if (configChanged) {
         // Stop playback and reset to first element if config changed
         if (isPlaying) {
@@ -199,8 +202,6 @@ export function Player({
           setSentenceChunks([])
           setSelectedSubElementDuration(null)
         }
-        // Update the previous config reference
-        prevConfigRef.current = [...configSequence]
         // Fetch duration for the first element
         await fetchElementDuration(0)
       }
@@ -226,19 +227,27 @@ export function Player({
 
   // Reset player state when storyId changes
   useEffect(() => {
-    // Clear caches if story changed
-    if (currentStoryIdRef.current !== storyId) {
-      audioCache.current.clear()
-      sentenceChunksCache.current.clear()
-      pendingAudioRequests.current.clear()
-      pendingSentenceRequests.current.clear()
-      durationCache.current.clear()
-      currentStoryIdRef.current = storyId
+    // Only reset if storyId actually changed to a different value
+    // Don't reset if storyId is temporarily empty during fetches (both empty = no change)
+    if (currentStoryIdRef.current === storyId) return
+    if (!storyId && !currentStoryIdRef.current) return // Both empty, no change
+    
+    // Clear caches when story changed
+    audioCache.current.clear()
+    sentenceChunksCache.current.clear()
+    pendingAudioRequests.current.clear()
+    pendingSentenceRequests.current.clear()
+    durationCache.current.clear()
+    
+    // Only reset player state if we have a valid storyId
+    // (Don't reset when changing from valid to empty, only when changing to a new valid ID)
+    if (storyId) {
+      resetPlayerState(true) // Reset to first element
+      onPlayError(null)
     }
     
-    // Reset all player state
-    resetPlayerState(true) // Reset to first element
-    onPlayError(null)
+    // Always update the ref to track the current storyId
+    currentStoryIdRef.current = storyId
     
     // Let the first useEffect handle duration fetching to avoid duplicates
     // The first useEffect will run after this one and handle the duration fetching
