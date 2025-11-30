@@ -471,11 +471,13 @@ export function Player({
         URL.revokeObjectURL(url)
         reject(new Error('Audio playback error')) 
       }
+      
       playAbortRef.current = { aborted: false, currentAudio: audio }
-      audio.play().catch(err => { 
+      
+      audio.play().catch(err => {
         setProgress(null)
         URL.revokeObjectURL(url)
-        reject(err) 
+        reject(err)
       })
     })
   }
@@ -773,6 +775,13 @@ export function Player({
         }
       }
     } else {
+      // Unlock audio context on mobile browsers - must be done synchronously in user gesture
+      try {
+        const unlockAudio = new Audio()
+        unlockAudio.volume = 0
+        unlockAudio.play().then(() => unlockAudio.pause()).catch(() => {})
+      } catch {}
+      
       // Start playing
       onPlayError(null)
       setIsPlaying(true)
